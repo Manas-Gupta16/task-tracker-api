@@ -3,9 +3,8 @@
   "version": "1.0.0",
   "description": "A simple and scalable backend API for managing tasks with secure user authentication.",
   "main": "index.js",
-  "scripts": {
-  "start": "node server.js",
-  "dev": "nodemon server.js"
+ "scripts": {
+  "server": "nodemon server.js"
 },
   "repository": {
     "type": "git",

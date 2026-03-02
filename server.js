@@ -1,11 +1,12 @@
-require('dotenv').config()   // 1️⃣ Load env variables
+require('dotenv').config()
 
 const express = require('express')
 const connectDB = require('./config/db')
 
-connectDB()                  // 2️⃣ Now DB can read MONGO_URI
-
 const app = express()
+
+// CALL DATABASE
+connectDB()
 
 app.get('/', (req,res)=>{
     res.send("API Running")
