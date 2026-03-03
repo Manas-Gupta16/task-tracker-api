@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "A simple and scalable backend API for managing tasks with secure user authentication.",
   "main": "index.js",
- "scripts": {
-  "server": "nodemon server.js"
-},
+  "scripts": {
+    "server": "nodemon server.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Manas-Gupta16/task-tracker-api.git"
@@ -18,8 +18,10 @@
   },
   "homepage": "https://github.com/Manas-Gupta16/task-tracker-api#readme",
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.2.3"
   },
   "devDependencies": {
