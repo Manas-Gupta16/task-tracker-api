@@ -18,10 +18,7 @@ app.use('/api/auth', authRoutes)
 
 // Protected Route
 app.get('/api/profile', protect, (req, res) => {
-    res.json({
-        message: "Welcome to your profile",
-        userId: req.user
-    })
+    res.json(req.user)
 })
 
 // Start Server
