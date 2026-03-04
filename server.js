@@ -4,6 +4,7 @@ const express = require('express')
 const connectDB = require('./config/db')
 const authRoutes = require('./routes/authRoutes')
 const protect = require('./middleware/authMiddleware')
+const taskRoutes = require('./routes/taskRoutes')
 
 const app = express()
 
@@ -15,6 +16,7 @@ app.use(express.json())
 
 // Auth Routes
 app.use('/api/auth', authRoutes)
+app.use('/api/tasks', taskRoutes)
 
 // Protected Route
 app.get('/api/profile', protect, (req, res) => {
