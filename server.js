@@ -14,8 +14,18 @@ connectDB()
 // Middleware to parse JSON
 app.use(express.json())
 
+// Root Route (NEW)
+app.get('/', (req,res)=>{
+    res.json({
+        message: "Task Tracker API",
+        status: "Running"
+    })
+})
+
 // Auth Routes
 app.use('/api/auth', authRoutes)
+
+// Task Routes
 app.use('/api/tasks', taskRoutes)
 
 // Protected Route
