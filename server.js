@@ -33,6 +33,15 @@ app.get('/api/profile', protect, (req, res) => {
     res.json(req.user)
 })
 
+// Health Check Route  ← PASTE HERE
+app.get('/api/health', (req, res) => {
+    res.status(200).json({
+        status: "OK",
+        uptime: process.uptime(),
+        timestamp: new Date()
+    })
+})
+
 // Start Server
 const PORT = process.env.PORT || 5000
 
