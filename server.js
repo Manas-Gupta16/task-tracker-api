@@ -42,22 +42,6 @@ app.get('/api/health', (req, res) => {
     })
 })
 
-dbs  = {
-    "manas": "Something is better than nothing",
-    "tushar":"Love is the most twisted curse",
-    "hardik":"Nothing is true // everything is permitted"
-}
-
-db2 = {
-    19:"Nigga",
-    20:"Nigger"
-}
-
-app.get("/loda/:id/:rno",(req,res) => {
-    res.send(`${dbs[req.params.id]}: ${db2[req.params.rno]}`)
-})
-
-
 // Start Server
 const PORT = process.env.PORT || 5000
 
