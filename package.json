@@ -2,7 +2,7 @@
   "name": "task-tracker-api",
   "version": "1.0.0",
   "description": "A simple and scalable backend API for managing tasks with secure user authentication.",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "server": "nodemon server.js"
   },
