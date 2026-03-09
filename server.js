@@ -1,6 +1,8 @@
 require('dotenv').config()
 
 const express = require('express')
+const cors = require('cors')
+
 const connectDB = require('./config/db')
 const authRoutes = require('./routes/authRoutes')
 const protect = require('./middleware/authMiddleware')
@@ -10,6 +12,9 @@ const app = express()
 
 // Connect Database
 connectDB()
+
+// Enable CORS
+app.use(cors())
 
 // Middleware to parse JSON
 app.use(express.json())
