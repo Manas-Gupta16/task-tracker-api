@@ -115,6 +115,7 @@ http://localhost:5000
 ## 📈 Future Improvements
 
 - Docker Support
+- Fronted - Vite
 - Task Due Dates
 - Priority Levels
 - User Profiles
