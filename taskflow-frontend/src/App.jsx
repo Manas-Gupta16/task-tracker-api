@@ -1,9 +1,15 @@
 import Login from "./pages/Login"
+import Dashboard from "./pages/Dashboard"
 
 function App() {
-  return (
-    <Login />
-  )
+
+  const path = window.location.pathname
+
+  if (path === "/dashboard") {
+    return <Dashboard />
+  }
+
+  return <Login />
 }
 
 export default App

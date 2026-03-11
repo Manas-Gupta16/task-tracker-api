@@ -19,7 +19,7 @@ function Login() {
       // save token
       localStorage.setItem("token", res.data.token)
 
-      alert("Login successful")
+      window.location.href = "/dashboard"
 
     } catch (error) {
       alert("Login failed")
