@@ -4,6 +4,7 @@ import API from "../services/api"
 function Dashboard() {
 
   const [tasks, setTasks] = useState([])
+  const [title, setTitle] = useState("")
 
   const fetchTasks = async () => {
     try {
@@ -23,6 +24,29 @@ function Dashboard() {
     }
   }
 
+  const addTask = async () => {
+  try {
+
+    const token = localStorage.getItem("token")
+
+    const res = await API.post(
+      "/tasks",
+      { title },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
+
+    setTasks([...tasks, res.data])
+    setTitle("")
+
+  } catch (error) {
+    console.error("Error adding task", error)
+  }
+}
+
   useEffect(() => {
     fetchTasks()
   }, [])
@@ -35,6 +59,25 @@ function Dashboard() {
       </h1>
 
       <div className="bg-white p-6 rounded-xl shadow-md">
+
+  <div className="mb-6 flex gap-3">
+
+    <input
+      type="text"
+      placeholder="Enter task..."
+      value={title}
+      onChange={(e) => setTitle(e.target.value)}
+      className="border p-3 rounded-lg flex-1"
+    />
+
+    <button
+      onClick={addTask}
+      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+    >
+      Add Task
+    </button>
+
+  </div>
 
         {tasks.length === 0 ? (
           <p>No tasks yet</p>
