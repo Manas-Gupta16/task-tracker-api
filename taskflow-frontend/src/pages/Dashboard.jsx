@@ -47,6 +47,24 @@ function Dashboard() {
   }
 }
 
+const deleteTask = async (id) => {
+  try {
+
+    const token = localStorage.getItem("token")
+
+    await API.delete(`/tasks/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+
+    setTasks(tasks.filter((task) => task._id !== id))
+
+  } catch (error) {
+    console.error("Error deleting task", error)
+  }
+}
+
   useEffect(() => {
     fetchTasks()
   }, [])
@@ -87,7 +105,19 @@ function Dashboard() {
               key={task._id}
               className="border p-3 mb-2 rounded-lg flex justify-between"
             >
-              <span>{task.title}</span>
+              <div
+  key={task._id}
+  className="border p-3 mb-2 rounded-lg flex justify-between items-center"
+>
+  <span>{task.title}</span>
+
+  <button
+    onClick={() => deleteTask(task._id)}
+    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+  >
+      Delete
+  </button>
+</div>
             </div>
           ))
         )}
