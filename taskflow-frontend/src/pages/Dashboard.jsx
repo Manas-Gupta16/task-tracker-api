@@ -1,16 +1,23 @@
+import { useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
-import API from "../services/api"
+import API from "../services/api.js"
 
 function Dashboard() {
 
   const [tasks, setTasks] = useState([])
   const [title, setTitle] = useState("")
+  const navigate = useNavigate()
 
   // Fetch Tasks
   const fetchTasks = async () => {
     try {
 
       const token = localStorage.getItem("token")
+
+      if (!token) {
+        navigate("/")
+        return
+      }
 
       const res = await API.get("/tasks", {
         headers: {
@@ -43,7 +50,7 @@ function Dashboard() {
         }
       )
 
-      setTasks([...tasks, res.data])
+      setTasks((prev) => [...prev, res.data])
       setTitle("")
 
     } catch (error) {
@@ -63,14 +70,14 @@ function Dashboard() {
         }
       })
 
-      setTasks(tasks.filter((task) => task._id !== id))
+      setTasks((prev) => prev.filter((task) => task._id !== id))
 
     } catch (error) {
       console.error("Error deleting task", error)
     }
   }
 
-  // Toggle Complete
+  // Toggle Task Completion
   const toggleComplete = async (task) => {
     try {
 
@@ -86,8 +93,8 @@ function Dashboard() {
         }
       )
 
-      setTasks(
-        tasks.map((t) =>
+      setTasks((prev) =>
+        prev.map((t) =>
           t._id === task._id ? res.data : t
         )
       )
@@ -97,6 +104,12 @@ function Dashboard() {
     }
   }
 
+  // Logout
+  const logout = () => {
+    localStorage.removeItem("token")
+    navigate("/")
+  }
+
   useEffect(() => {
     fetchTasks()
   }, [])
@@ -104,13 +117,26 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-100 p-10">
 
-      <h1 className="text-3xl font-bold mb-6">
-        TaskFlow Dashboard
-      </h1>
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
 
+        <h1 className="text-3xl font-bold">
+          TaskFlow Dashboard
+        </h1>
+
+        <button
+          onClick={logout}
+          className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-black"
+        >
+          Logout
+        </button>
+
+      </div>
+
+      {/* Main Card */}
       <div className="bg-white p-6 rounded-xl shadow-md">
 
-        {/* Add Task Section */}
+        {/* Add Task */}
         <div className="mb-6 flex gap-3">
 
           <input
@@ -118,6 +144,7 @@ function Dashboard() {
             placeholder="Enter task..."
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && addTask()}
             className="border p-3 rounded-lg flex-1"
           />
 
@@ -132,7 +159,9 @@ function Dashboard() {
 
         {/* Task List */}
         {tasks.length === 0 ? (
-          <p>No tasks yet</p>
+          <p className="text-gray-500 text-center">
+            No tasks yet. Add your first task 🚀
+          </p>
         ) : (
           tasks.map((task) => (
             <div
@@ -148,7 +177,13 @@ function Dashboard() {
                   onChange={() => toggleComplete(task)}
                 />
 
-                <span className={task.completed ? "line-through text-gray-400" : ""}>
+                <span
+                  className={
+                    task.completed
+                      ? "line-through text-gray-400"
+                      : ""
+                  }
+                >
                   {task.title}
                 </span>
 

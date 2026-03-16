@@ -1,15 +1,38 @@
+import { Routes, Route, Navigate } from "react-router-dom"
 import Login from "./pages/Login"
+import Register from "./pages/Register"
 import Dashboard from "./pages/Dashboard"
 
-function App() {
+function ProtectedRoute({ children }) {
 
-  const path = window.location.pathname
+  const token = localStorage.getItem("token")
 
-  if (path === "/dashboard") {
-    return <Dashboard />
+  if (!token) {
+    return <Navigate to="/" />
   }
 
-  return <Login />
+  return children
+}
+
+function App() {
+  return (
+    <Routes>
+
+      <Route path="/" element={<Login />} />
+
+      <Route path="/register" element={<Register />} />
+
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+
+    </Routes>
+  )
 }
 
 export default App
