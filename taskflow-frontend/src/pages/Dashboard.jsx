@@ -6,18 +6,14 @@ function Dashboard() {
 
   const [tasks, setTasks] = useState([])
   const [title, setTitle] = useState("")
+  const [editingId, setEditingId] = useState(null)
+  const [editText, setEditText] = useState("")
   const navigate = useNavigate()
 
-  // Fetch Tasks
   const fetchTasks = async () => {
     try {
 
       const token = localStorage.getItem("token")
-
-      if (!token) {
-        navigate("/")
-        return
-      }
 
       const res = await API.get("/tasks", {
         headers: {
@@ -32,7 +28,6 @@ function Dashboard() {
     }
   }
 
-  // Add Task
   const addTask = async () => {
     try {
 
@@ -58,7 +53,35 @@ function Dashboard() {
     }
   }
 
-  // Delete Task
+  const updateTask = async (id) => {
+    try {
+
+      if (!editText.trim()) return
+
+      const token = localStorage.getItem("token")
+
+      const res = await API.put(
+        `/tasks/${id}`,
+        { title: editText },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+
+      setTasks((prev) =>
+        prev.map((t) => (t._id === id ? res.data : t))
+      )
+
+      setEditingId(null)
+      setEditText("")
+
+    } catch (error) {
+      console.error("Error updating task", error)
+    }
+  }
+
   const deleteTask = async (id) => {
     try {
 
@@ -77,7 +100,6 @@ function Dashboard() {
     }
   }
 
-  // Toggle Task Completion
   const toggleComplete = async (task) => {
     try {
 
@@ -104,7 +126,6 @@ function Dashboard() {
     }
   }
 
-  // Logout
   const logout = () => {
     localStorage.removeItem("token")
     navigate("/")
@@ -117,7 +138,6 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-100 p-10">
 
-      {/* Header */}
       <div className="flex justify-between items-center mb-6">
 
         <h1 className="text-3xl font-bold">
@@ -133,7 +153,6 @@ function Dashboard() {
 
       </div>
 
-      {/* Main Card */}
       <div className="bg-white p-6 rounded-xl shadow-md">
 
         {/* Add Task */}
@@ -160,7 +179,7 @@ function Dashboard() {
         {/* Task List */}
         {tasks.length === 0 ? (
           <p className="text-gray-500 text-center">
-            No tasks yet. Add your first task 🚀
+            No tasks yet 🚀
           </p>
         ) : (
           tasks.map((task) => (
@@ -177,24 +196,49 @@ function Dashboard() {
                   onChange={() => toggleComplete(task)}
                 />
 
-                <span
-                  className={
-                    task.completed
-                      ? "line-through text-gray-400"
-                      : ""
-                  }
-                >
-                  {task.title}
-                </span>
+                {editingId === task._id ? (
+                  <input
+                    value={editText}
+                    onChange={(e) => setEditText(e.target.value)}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && updateTask(task._id)
+                    }
+                    className="border p-1 rounded"
+                  />
+                ) : (
+                  <span
+                    className={
+                      task.completed
+                        ? "line-through text-gray-400"
+                        : ""
+                    }
+                  >
+                    {task.title}
+                  </span>
+                )}
 
               </div>
 
-              <button
-                onClick={() => deleteTask(task._id)}
-                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-              >
-                Delete
-              </button>
+              <div className="flex gap-2">
+
+                <button
+                  onClick={() => {
+                    setEditingId(task._id)
+                    setEditText(task.title)
+                  }}
+                  className="bg-yellow-500 text-white px-3 py-1 rounded"
+                >
+                  Edit
+                </button>
+
+                <button
+                  onClick={() => deleteTask(task._id)}
+                  className="bg-red-500 text-white px-3 py-1 rounded"
+                >
+                  Delete
+                </button>
+
+              </div>
 
             </div>
           ))

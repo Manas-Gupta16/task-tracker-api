@@ -11,6 +11,11 @@ function Register() {
   const handleRegister = async () => {
     try {
 
+      if (!email || !password) {
+        alert("Please fill all fields")
+        return
+      }
+
       const res = await API.post("/auth/register", {
         email,
         password
@@ -21,8 +26,11 @@ function Register() {
       navigate("/")
 
     } catch (error) {
-      console.error(error)
-      alert("Registration failed")
+
+      console.log("REGISTER ERROR:", error.response)
+
+      alert(error.response?.data?.message || "Server error")
+
     }
   }
 
@@ -49,6 +57,7 @@ function Register() {
           className="w-full p-3 mb-6 border rounded-lg"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleRegister()}
         />
 
         <button
@@ -57,6 +66,16 @@ function Register() {
         >
           Register
         </button>
+
+        <p className="text-center mt-4 text-gray-600">
+          Already have an account?{" "}
+          <span
+            className="text-blue-600 cursor-pointer"
+            onClick={() => navigate("/")}
+          >
+            Login
+          </span>
+        </p>
 
       </div>
 
