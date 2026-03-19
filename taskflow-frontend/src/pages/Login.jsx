@@ -49,6 +49,7 @@ function Login() {
           className="w-full p-3 mb-6 border rounded-lg"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleLogin()}
         />
 
         <button
@@ -57,6 +58,17 @@ function Login() {
         >
           Login
         </button>
+
+        {/* 👇 REGISTER LINK */}
+        <p className="text-center mt-4 text-gray-600">
+          Don't have an account?{" "}
+          <span
+            className="text-blue-600 font-semibold cursor-pointer hover:underline"
+            onClick={() => navigate("/register")}
+          >
+            Register
+          </span>
+        </p>
 
       </div>
 
