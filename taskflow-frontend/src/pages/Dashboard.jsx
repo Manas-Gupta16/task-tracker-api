@@ -8,11 +8,12 @@ function Dashboard() {
   const [title, setTitle] = useState("")
   const [editingId, setEditingId] = useState(null)
   const [editText, setEditText] = useState("")
+  const [filter, setFilter] = useState("all")
+
   const navigate = useNavigate()
 
   const fetchTasks = async () => {
     try {
-
       const token = localStorage.getItem("token")
 
       const res = await API.get("/tasks", {
@@ -30,7 +31,6 @@ function Dashboard() {
 
   const addTask = async () => {
     try {
-
       if (!title.trim()) return
 
       const token = localStorage.getItem("token")
@@ -45,7 +45,7 @@ function Dashboard() {
         }
       )
 
-      setTasks((prev) => [...prev, res.data])
+      setTasks(prev => [...prev, res.data])
       setTitle("")
 
     } catch (error) {
@@ -55,7 +55,6 @@ function Dashboard() {
 
   const updateTask = async (id) => {
     try {
-
       if (!editText.trim()) return
 
       const token = localStorage.getItem("token")
@@ -70,8 +69,8 @@ function Dashboard() {
         }
       )
 
-      setTasks((prev) =>
-        prev.map((t) => (t._id === id ? res.data : t))
+      setTasks(prev =>
+        prev.map(t => t._id === id ? res.data : t)
       )
 
       setEditingId(null)
@@ -84,7 +83,6 @@ function Dashboard() {
 
   const deleteTask = async (id) => {
     try {
-
       const token = localStorage.getItem("token")
 
       await API.delete(`/tasks/${id}`, {
@@ -93,7 +91,7 @@ function Dashboard() {
         }
       })
 
-      setTasks((prev) => prev.filter((task) => task._id !== id))
+      setTasks(prev => prev.filter(task => task._id !== id))
 
     } catch (error) {
       console.error("Error deleting task", error)
@@ -102,7 +100,6 @@ function Dashboard() {
 
   const toggleComplete = async (task) => {
     try {
-
       const token = localStorage.getItem("token")
 
       const res = await API.put(
@@ -115,10 +112,8 @@ function Dashboard() {
         }
       )
 
-      setTasks((prev) =>
-        prev.map((t) =>
-          t._id === task._id ? res.data : t
-        )
+      setTasks(prev =>
+        prev.map(t => t._id === task._id ? res.data : t)
       )
 
     } catch (error) {
@@ -135,9 +130,17 @@ function Dashboard() {
     fetchTasks()
   }, [])
 
+  // 🔥 FILTER LOGIC
+  const filteredTasks = tasks.filter(task => {
+    if (filter === "completed") return task.completed
+    if (filter === "pending") return !task.completed
+    return true
+  })
+
   return (
     <div className="min-h-screen bg-gray-100 p-10">
 
+      {/* Header */}
       <div className="flex justify-between items-center mb-6">
 
         <h1 className="text-3xl font-bold">
@@ -176,13 +179,39 @@ function Dashboard() {
 
         </div>
 
+        {/* 🔥 FILTER BUTTONS */}
+        <div className="flex gap-3 mb-6">
+
+          <button
+            onClick={() => setFilter("all")}
+            className={`px-3 py-1 rounded ${filter === "all" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+          >
+            All
+          </button>
+
+          <button
+            onClick={() => setFilter("completed")}
+            className={`px-3 py-1 rounded ${filter === "completed" ? "bg-green-600 text-white" : "bg-gray-200"}`}
+          >
+            Completed
+          </button>
+
+          <button
+            onClick={() => setFilter("pending")}
+            className={`px-3 py-1 rounded ${filter === "pending" ? "bg-yellow-500 text-white" : "bg-gray-200"}`}
+          >
+            Pending
+          </button>
+
+        </div>
+
         {/* Task List */}
-        {tasks.length === 0 ? (
+        {filteredTasks.length === 0 ? (
           <p className="text-gray-500 text-center">
-            No tasks yet 🚀
+            No tasks found 🚀
           </p>
         ) : (
-          tasks.map((task) => (
+          filteredTasks.map(task => (
             <div
               key={task._id}
               className="border p-3 mb-2 rounded-lg flex justify-between items-center"
@@ -206,13 +235,7 @@ function Dashboard() {
                     className="border p-1 rounded"
                   />
                 ) : (
-                  <span
-                    className={
-                      task.completed
-                        ? "line-through text-gray-400"
-                        : ""
-                    }
-                  >
+                  <span className={task.completed ? "line-through text-gray-400" : ""}>
                     {task.title}
                   </span>
                 )}
