@@ -9,6 +9,7 @@ function Dashboard() {
   const [editingId, setEditingId] = useState(null)
   const [editText, setEditText] = useState("")
   const [filter, setFilter] = useState("all")
+  const [search, setSearch] = useState("")
 
   const navigate = useNavigate()
 
@@ -130,22 +131,23 @@ function Dashboard() {
     fetchTasks()
   }, [])
 
-  // 🔥 FILTER LOGIC
-  const filteredTasks = tasks.filter(task => {
-    if (filter === "completed") return task.completed
-    if (filter === "pending") return !task.completed
-    return true
-  })
+  // 🔥 FILTER + SEARCH LOGIC
+  const filteredTasks = tasks
+    .filter(task => {
+      if (filter === "completed") return task.completed
+      if (filter === "pending") return !task.completed
+      return true
+    })
+    .filter(task =>
+      task.title.toLowerCase().includes(search.toLowerCase())
+    )
 
   return (
     <div className="min-h-screen bg-gray-100 p-10">
 
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-
-        <h1 className="text-3xl font-bold">
-          TaskFlow Dashboard
-        </h1>
+        <h1 className="text-3xl font-bold">TaskFlow Dashboard</h1>
 
         <button
           onClick={logout}
@@ -153,14 +155,12 @@ function Dashboard() {
         >
           Logout
         </button>
-
       </div>
 
       <div className="bg-white p-6 rounded-xl shadow-md">
 
         {/* Add Task */}
         <div className="mb-6 flex gap-3">
-
           <input
             type="text"
             placeholder="Enter task..."
@@ -176,12 +176,19 @@ function Dashboard() {
           >
             Add Task
           </button>
-
         </div>
 
-        {/* 🔥 FILTER BUTTONS */}
-        <div className="flex gap-3 mb-6">
+        {/* 🔍 SEARCH */}
+        <input
+          type="text"
+          placeholder="Search tasks..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full mb-4 p-3 border rounded-lg"
+        />
 
+        {/* FILTERS */}
+        <div className="flex gap-3 mb-6">
           <button
             onClick={() => setFilter("all")}
             className={`px-3 py-1 rounded ${filter === "all" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
@@ -202,23 +209,20 @@ function Dashboard() {
           >
             Pending
           </button>
-
         </div>
 
         {/* Task List */}
         {filteredTasks.length === 0 ? (
           <p className="text-gray-500 text-center">
-            No tasks found 🚀
+            No matching tasks found 🔍
           </p>
         ) : (
           filteredTasks.map(task => (
             <div
               key={task._id}
-              className="border p-3 mb-2 rounded-lg flex justify-between items-center"
+              className="border p-3 mb-2 rounded-lg flex justify-between items-center hover:shadow-sm transition"
             >
-
               <div className="flex items-center gap-3">
-
                 <input
                   type="checkbox"
                   checked={task.completed}
@@ -239,11 +243,9 @@ function Dashboard() {
                     {task.title}
                   </span>
                 )}
-
               </div>
 
               <div className="flex gap-2">
-
                 <button
                   onClick={() => {
                     setEditingId(task._id)
@@ -260,9 +262,7 @@ function Dashboard() {
                 >
                   Delete
                 </button>
-
               </div>
-
             </div>
           ))
         )}
