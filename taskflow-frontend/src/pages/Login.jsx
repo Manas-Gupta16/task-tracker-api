@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import API from "../services/api.js"
 
@@ -7,6 +7,14 @@ function Login() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const navigate = useNavigate()
+
+  // 🔥 AUTO REDIRECT IF ALREADY LOGGED IN
+  useEffect(() => {
+    const token = localStorage.getItem("token")
+    if (token) {
+      navigate("/dashboard")
+    }
+  }, [])
 
   const handleLogin = async () => {
     try {
@@ -59,7 +67,7 @@ function Login() {
           Login
         </button>
 
-        {/* 👇 REGISTER LINK */}
+        {/* REGISTER LINK */}
         <p className="text-center mt-4 text-gray-600">
           Don't have an account?{" "}
           <span
