@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import API from "../services/api.js"
+import toast from "react-hot-toast"
 
 function Register() {
 
@@ -12,16 +13,16 @@ function Register() {
     try {
 
       if (!email || !password) {
-        alert("Please fill all fields")
+        toast.error("Please fill all fields ❌")
         return
       }
 
-      const res = await API.post("/auth/register", {
+      await API.post("/auth/register", {
         email,
         password
       })
 
-      alert("Registration successful")
+      toast.success("Registration successful 🎉")
 
       navigate("/")
 
@@ -29,8 +30,9 @@ function Register() {
 
       console.log("REGISTER ERROR:", error.response)
 
-      alert(error.response?.data?.message || "Server error")
-
+      toast.error(
+        error.response?.data?.message || "Server error ❌"
+      )
     }
   }
 
@@ -70,7 +72,7 @@ function Register() {
         <p className="text-center mt-4 text-gray-600">
           Already have an account?{" "}
           <span
-            className="text-blue-600 cursor-pointer"
+            className="text-blue-600 cursor-pointer hover:underline"
             onClick={() => navigate("/")}
           >
             Login

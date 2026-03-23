@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import API from "../services/api.js"
+import toast from "react-hot-toast"
 
 function Login() {
 
@@ -8,7 +9,6 @@ function Login() {
   const [password, setPassword] = useState("")
   const navigate = useNavigate()
 
-  // 🔥 AUTO REDIRECT IF ALREADY LOGGED IN
   useEffect(() => {
     const token = localStorage.getItem("token")
     if (token) {
@@ -26,10 +26,12 @@ function Login() {
 
       localStorage.setItem("token", res.data.token)
 
+      toast.success("Login successful 🚀")
+
       navigate("/dashboard")
 
     } catch (error) {
-      alert("Login failed")
+      toast.error("Invalid email or password ❌")
       console.error(error)
     }
   }
@@ -67,7 +69,6 @@ function Login() {
           Login
         </button>
 
-        {/* REGISTER LINK */}
         <p className="text-center mt-4 text-gray-600">
           Don't have an account?{" "}
           <span
