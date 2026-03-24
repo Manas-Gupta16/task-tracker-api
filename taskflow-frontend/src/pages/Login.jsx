@@ -7,17 +7,25 @@ function Login() {
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+
   const navigate = useNavigate()
 
   useEffect(() => {
     const token = localStorage.getItem("token")
-    if (token) {
-      navigate("/dashboard")
-    }
+    if (token) navigate("/dashboard")
   }, [])
 
   const handleLogin = async () => {
+
+    if (!email || !password) {
+      toast.error("Please fill all fields")
+      return
+    }
+
     try {
+
+      setLoading(true)
 
       const res = await API.post("/auth/login", {
         email,
@@ -31,8 +39,13 @@ function Login() {
       navigate("/dashboard")
 
     } catch (error) {
-      toast.error("Invalid email or password ❌")
-      console.error(error)
+
+      toast.error("Invalid credentials")
+
+    } finally {
+
+      setLoading(false)
+
     }
   }
 
@@ -64,15 +77,17 @@ function Login() {
 
         <button
           onClick={handleLogin}
-          className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700"
+          disabled={loading}
+          className={`w-full p-3 rounded-lg text-white 
+          ${loading ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"}`}
         >
-          Login
+          {loading ? "Logging in..." : "Login"}
         </button>
 
         <p className="text-center mt-4 text-gray-600">
           Don't have an account?{" "}
           <span
-            className="text-blue-600 font-semibold cursor-pointer hover:underline"
+            className="text-blue-600 cursor-pointer hover:underline"
             onClick={() => navigate("/register")}
           >
             Register

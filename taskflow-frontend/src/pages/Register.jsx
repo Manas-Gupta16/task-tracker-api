@@ -7,15 +7,20 @@ function Register() {
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+
   const navigate = useNavigate()
 
   const handleRegister = async () => {
+
+    if (!email || !password) {
+      toast.error("Please fill all fields ❌")
+      return
+    }
+
     try {
 
-      if (!email || !password) {
-        toast.error("Please fill all fields ❌")
-        return
-      }
+      setLoading(true)
 
       await API.post("/auth/register", {
         email,
@@ -33,6 +38,11 @@ function Register() {
       toast.error(
         error.response?.data?.message || "Server error ❌"
       )
+
+    } finally {
+
+      setLoading(false)
+
     }
   }
 
@@ -64,9 +74,11 @@ function Register() {
 
         <button
           onClick={handleRegister}
-          className="w-full bg-purple-600 text-white p-3 rounded-lg hover:bg-purple-700"
+          disabled={loading}
+          className={`w-full p-3 rounded-lg text-white 
+          ${loading ? "bg-gray-400" : "bg-purple-600 hover:bg-purple-700"}`}
         >
-          Register
+          {loading ? "Registering..." : "Register"}
         </button>
 
         <p className="text-center mt-4 text-gray-600">
