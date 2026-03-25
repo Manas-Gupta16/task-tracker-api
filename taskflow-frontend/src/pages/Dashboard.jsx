@@ -1,20 +1,24 @@
 import { useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
-import API from "../services/api.js"
+import API from "../services/api"
+import toast from "react-hot-toast"
 
 function Dashboard() {
 
   const [tasks, setTasks] = useState([])
   const [title, setTitle] = useState("")
-  const [editingId, setEditingId] = useState(null)
-  const [editText, setEditText] = useState("")
-  const [filter, setFilter] = useState("all")
-  const [search, setSearch] = useState("")
-
   const navigate = useNavigate()
 
+  // Stats
+  const totalTasks = tasks.length
+  const completedTasks = tasks.filter(t => t.completed).length
+  const pendingTasks = totalTasks - completedTasks
+  const progress = totalTasks === 0 ? 0 : (completedTasks / totalTasks) * 100
+
+  // Fetch Tasks
   const fetchTasks = async () => {
     try {
+
       const token = localStorage.getItem("token")
 
       const res = await API.get("/tasks", {
@@ -26,13 +30,21 @@ function Dashboard() {
       setTasks(res.data)
 
     } catch (error) {
-      console.error("Error fetching tasks", error)
+
+      toast.error("Failed to fetch tasks")
+
     }
   }
 
+  // Add Task
   const addTask = async () => {
+
+    if (!title.trim()) {
+      toast.error("Task cannot be empty")
+      return
+    }
+
     try {
-      if (!title.trim()) return
 
       const token = localStorage.getItem("token")
 
@@ -46,44 +58,21 @@ function Dashboard() {
         }
       )
 
-      setTasks(prev => [...prev, res.data])
+      setTasks([...tasks, res.data])
       setTitle("")
+      toast.success("Task added")
 
     } catch (error) {
-      console.error("Error adding task", error)
+
+      toast.error("Error adding task")
+
     }
   }
 
-  const updateTask = async (id) => {
-    try {
-      if (!editText.trim()) return
-
-      const token = localStorage.getItem("token")
-
-      const res = await API.put(
-        `/tasks/${id}`,
-        { title: editText },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      )
-
-      setTasks(prev =>
-        prev.map(t => t._id === id ? res.data : t)
-      )
-
-      setEditingId(null)
-      setEditText("")
-
-    } catch (error) {
-      console.error("Error updating task", error)
-    }
-  }
-
+  // Delete Task
   const deleteTask = async (id) => {
     try {
+
       const token = localStorage.getItem("token")
 
       await API.delete(`/tasks/${id}`, {
@@ -92,15 +81,20 @@ function Dashboard() {
         }
       })
 
-      setTasks(prev => prev.filter(task => task._id !== id))
+      setTasks(tasks.filter(task => task._id !== id))
+      toast.success("Task deleted")
 
     } catch (error) {
-      console.error("Error deleting task", error)
+
+      toast.error("Error deleting task")
+
     }
   }
 
+  // Toggle Task Completion
   const toggleComplete = async (task) => {
     try {
+
       const token = localStorage.getItem("token")
 
       const res = await API.put(
@@ -113,15 +107,16 @@ function Dashboard() {
         }
       )
 
-      setTasks(prev =>
-        prev.map(t => t._id === task._id ? res.data : t)
-      )
+      setTasks(tasks.map(t => t._id === task._id ? res.data : t))
 
     } catch (error) {
-      console.error("Error updating task", error)
+
+      toast.error("Error updating task")
+
     }
   }
 
+  // Logout
   const logout = () => {
     localStorage.removeItem("token")
     navigate("/")
@@ -131,23 +126,15 @@ function Dashboard() {
     fetchTasks()
   }, [])
 
-  // 🔥 FILTER + SEARCH LOGIC
-  const filteredTasks = tasks
-    .filter(task => {
-      if (filter === "completed") return task.completed
-      if (filter === "pending") return !task.completed
-      return true
-    })
-    .filter(task =>
-      task.title.toLowerCase().includes(search.toLowerCase())
-    )
-
   return (
     <div className="min-h-screen bg-gray-100 p-10">
 
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">TaskFlow Dashboard</h1>
+      <div className="flex justify-between items-center mb-8">
+
+        <h1 className="text-3xl font-bold">
+          TaskFlow Dashboard
+        </h1>
 
         <button
           onClick={logout}
@@ -155,12 +142,56 @@ function Dashboard() {
         >
           Logout
         </button>
+
       </div>
 
-      <div className="bg-white p-6 rounded-xl shadow-md">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-3 gap-6 mb-8">
 
-        {/* Add Task */}
-        <div className="mb-6 flex gap-3">
+        <div className="bg-white p-6 rounded-xl shadow text-center">
+          <h3 className="text-gray-500">Total Tasks</h3>
+          <p className="text-3xl font-bold">{totalTasks}</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow text-center">
+          <h3 className="text-gray-500">Completed</h3>
+          <p className="text-3xl font-bold text-green-600">{completedTasks}</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow text-center">
+          <h3 className="text-gray-500">Pending</h3>
+          <p className="text-3xl font-bold text-red-500">{pendingTasks}</p>
+        </div>
+
+      </div>
+
+      {/* Progress Bar */}
+      <div className="bg-white p-6 rounded-xl shadow mb-8">
+
+        <h3 className="mb-3 font-semibold">
+          Task Completion Progress
+        </h3>
+
+        <div className="w-full bg-gray-200 rounded-full h-4">
+
+          <div
+            className="bg-green-500 h-4 rounded-full"
+            style={{ width: `${progress}%` }}
+          ></div>
+
+        </div>
+
+        <p className="text-sm text-gray-500 mt-2">
+          {Math.round(progress)}% completed
+        </p>
+
+      </div>
+
+      {/* Add Task */}
+      <div className="bg-white p-6 rounded-xl shadow">
+
+        <div className="flex gap-3 mb-6">
+
           <input
             type="text"
             placeholder="Enter task..."
@@ -176,93 +207,42 @@ function Dashboard() {
           >
             Add Task
           </button>
-        </div>
 
-        {/* 🔍 SEARCH */}
-        <input
-          type="text"
-          placeholder="Search tasks..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full mb-4 p-3 border rounded-lg"
-        />
-
-        {/* FILTERS */}
-        <div className="flex gap-3 mb-6">
-          <button
-            onClick={() => setFilter("all")}
-            className={`px-3 py-1 rounded ${filter === "all" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
-          >
-            All
-          </button>
-
-          <button
-            onClick={() => setFilter("completed")}
-            className={`px-3 py-1 rounded ${filter === "completed" ? "bg-green-600 text-white" : "bg-gray-200"}`}
-          >
-            Completed
-          </button>
-
-          <button
-            onClick={() => setFilter("pending")}
-            className={`px-3 py-1 rounded ${filter === "pending" ? "bg-yellow-500 text-white" : "bg-gray-200"}`}
-          >
-            Pending
-          </button>
         </div>
 
         {/* Task List */}
-        {filteredTasks.length === 0 ? (
+        {tasks.length === 0 ? (
           <p className="text-gray-500 text-center">
-            No matching tasks found 🔍
+            No tasks yet. Add your first task 🚀
           </p>
         ) : (
-          filteredTasks.map(task => (
+          tasks.map(task => (
             <div
               key={task._id}
-              className="border p-3 mb-2 rounded-lg flex justify-between items-center hover:shadow-sm transition"
+              className="border p-3 mb-2 rounded-lg flex justify-between items-center"
             >
+
               <div className="flex items-center gap-3">
+
                 <input
                   type="checkbox"
                   checked={task.completed}
                   onChange={() => toggleComplete(task)}
                 />
 
-                {editingId === task._id ? (
-                  <input
-                    value={editText}
-                    onChange={(e) => setEditText(e.target.value)}
-                    onKeyDown={(e) =>
-                      e.key === "Enter" && updateTask(task._id)
-                    }
-                    className="border p-1 rounded"
-                  />
-                ) : (
-                  <span className={task.completed ? "line-through text-gray-400" : ""}>
-                    {task.title}
-                  </span>
-                )}
+                <span className={task.completed ? "line-through text-gray-400" : ""}>
+                  {task.title}
+                </span>
+
               </div>
 
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    setEditingId(task._id)
-                    setEditText(task.title)
-                  }}
-                  className="bg-yellow-500 text-white px-3 py-1 rounded"
-                >
-                  Edit
-                </button>
+              <button
+                onClick={() => deleteTask(task._id)}
+                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+              >
+                Delete
+              </button>
 
-                <button
-                  onClick={() => deleteTask(task._id)}
-                  className="bg-red-500 text-white px-3 py-1 rounded"
-                >
-                  Delete
-                </button>
-              </div>
             </div>
           ))
         )}
