@@ -95,7 +95,7 @@ npm run dev
 
 ---
 
-### 3. Setup Frontend
+### 3. Setup Frontend - UI Upgrade
 
 ```
 cd client
