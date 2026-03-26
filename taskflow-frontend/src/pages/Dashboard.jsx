@@ -3,6 +3,9 @@ import { useEffect, useState } from "react"
 import API from "../services/api"
 import toast from "react-hot-toast"
 
+import Sidebar from "../components/Sidebar"
+import DarkModeToggle from "../components/DarkModeToggle"
+
 function Dashboard() {
 
   const [tasks, setTasks] = useState([])
@@ -30,9 +33,7 @@ function Dashboard() {
       setTasks(res.data)
 
     } catch (error) {
-
       toast.error("Failed to fetch tasks")
-
     }
   }
 
@@ -63,9 +64,7 @@ function Dashboard() {
       toast.success("Task added")
 
     } catch (error) {
-
       toast.error("Error adding task")
-
     }
   }
 
@@ -85,13 +84,11 @@ function Dashboard() {
       toast.success("Task deleted")
 
     } catch (error) {
-
       toast.error("Error deleting task")
-
     }
   }
 
-  // Toggle Task Completion
+  // Toggle Completion
   const toggleComplete = async (task) => {
     try {
 
@@ -110,9 +107,7 @@ function Dashboard() {
       setTasks(tasks.map(t => t._id === task._id ? res.data : t))
 
     } catch (error) {
-
       toast.error("Error updating task")
-
     }
   }
 
@@ -127,129 +122,138 @@ function Dashboard() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gray-100 p-10">
 
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8">
+    <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
 
-        <h1 className="text-3xl font-bold">
-          TaskFlow Dashboard
-        </h1>
+      <Sidebar logout={logout} />
 
-        <button
-          onClick={logout}
-          className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-black"
-        >
-          Logout
-        </button>
+      <DarkModeToggle />
 
-      </div>
+      <div className="flex-1 p-10">
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-3 gap-6 mb-8">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
 
-        <div className="bg-white p-6 rounded-xl shadow text-center">
-          <h3 className="text-gray-500">Total Tasks</h3>
-          <p className="text-3xl font-bold">{totalTasks}</p>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl shadow text-center">
-          <h3 className="text-gray-500">Completed</h3>
-          <p className="text-3xl font-bold text-green-600">{completedTasks}</p>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl shadow text-center">
-          <h3 className="text-gray-500">Pending</h3>
-          <p className="text-3xl font-bold text-red-500">{pendingTasks}</p>
-        </div>
-
-      </div>
-
-      {/* Progress Bar */}
-      <div className="bg-white p-6 rounded-xl shadow mb-8">
-
-        <h3 className="mb-3 font-semibold">
-          Task Completion Progress
-        </h3>
-
-        <div className="w-full bg-gray-200 rounded-full h-4">
-
-          <div
-            className="bg-green-500 h-4 rounded-full"
-            style={{ width: `${progress}%` }}
-          ></div>
+          <h1 className="text-3xl font-bold dark:text-white">
+            TaskFlow Dashboard
+          </h1>
 
         </div>
 
-        <p className="text-sm text-gray-500 mt-2">
-          {Math.round(progress)}% completed
-        </p>
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-6 mb-8">
 
-      </div>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow text-center">
+            <h3 className="text-gray-500 dark:text-gray-300">Total Tasks</h3>
+            <p className="text-3xl font-bold dark:text-white">{totalTasks}</p>
+          </div>
 
-      {/* Add Task */}
-      <div className="bg-white p-6 rounded-xl shadow">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow text-center">
+            <h3 className="text-gray-500 dark:text-gray-300">Completed</h3>
+            <p className="text-3xl font-bold text-green-600">{completedTasks}</p>
+          </div>
 
-        <div className="flex gap-3 mb-6">
-
-          <input
-            type="text"
-            placeholder="Enter task..."
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && addTask()}
-            className="border p-3 rounded-lg flex-1"
-          />
-
-          <button
-            onClick={addTask}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-          >
-            Add Task
-          </button>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow text-center">
+            <h3 className="text-gray-500 dark:text-gray-300">Pending</h3>
+            <p className="text-3xl font-bold text-red-500">{pendingTasks}</p>
+          </div>
 
         </div>
 
-        {/* Task List */}
-        {tasks.length === 0 ? (
-          <p className="text-gray-500 text-center">
-            No tasks yet. Add your first task 🚀
-          </p>
-        ) : (
-          tasks.map(task => (
+        {/* Progress */}
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow mb-8">
+
+          <h3 className="mb-3 font-semibold dark:text-white">
+            Task Completion Progress
+          </h3>
+
+          <div className="w-full bg-gray-200 rounded-full h-4">
+
             <div
-              key={task._id}
-              className="border p-3 mb-2 rounded-lg flex justify-between items-center"
+              className="bg-green-500 h-4 rounded-full"
+              style={{ width: `${progress}%` }}
+            ></div>
+
+          </div>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            {Math.round(progress)}% completed
+          </p>
+
+        </div>
+
+        {/* Add Task */}
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
+
+          <div className="flex gap-3 mb-6">
+
+            <input
+              type="text"
+              placeholder="Enter task..."
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addTask()}
+              className="border p-3 rounded-lg flex-1 dark:bg-gray-700 dark:text-white"
+            />
+
+            <button
+              onClick={addTask}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
             >
+              Add Task
+            </button>
 
-              <div className="flex items-center gap-3">
+          </div>
 
-                <input
-                  type="checkbox"
-                  checked={task.completed}
-                  onChange={() => toggleComplete(task)}
-                />
+          {/* Task List */}
+          {tasks.length === 0 ? (
 
-                <span className={task.completed ? "line-through text-gray-400" : ""}>
-                  {task.title}
-                </span>
+            <p className="text-gray-500 dark:text-gray-400 text-center">
+              No tasks yet. Add your first task 🚀
+            </p>
+
+          ) : (
+
+            tasks.map(task => (
+
+              <div
+                key={task._id}
+                className="border dark:border-gray-600 p-3 mb-2 rounded-lg flex justify-between items-center"
+              >
+
+                <div className="flex items-center gap-3">
+
+                  <input
+                    type="checkbox"
+                    checked={task.completed}
+                    onChange={() => toggleComplete(task)}
+                  />
+
+                  <span className={`${task.completed ? "line-through text-gray-400" : "dark:text-white"}`}>
+                    {task.title}
+                  </span>
+
+                </div>
+
+                <button
+                  onClick={() => deleteTask(task._id)}
+                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                >
+                  Delete
+                </button>
 
               </div>
 
-              <button
-                onClick={() => deleteTask(task._id)}
-                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-              >
-                Delete
-              </button>
+            ))
 
-            </div>
-          ))
-        )}
+          )}
+
+        </div>
 
       </div>
 
     </div>
+
   )
 }
 
