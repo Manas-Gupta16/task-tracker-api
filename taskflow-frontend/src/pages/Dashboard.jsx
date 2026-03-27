@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
+import { motion } from "framer-motion"
 import API from "../services/api"
 import toast from "react-hot-toast"
 
@@ -123,9 +124,14 @@ function Dashboard() {
 
   return (
 
-    <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="flex min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 dark:from-gray-900 dark:via-gray-900 dark:to-black">
 
-      <Sidebar logout={logout} />
+      <Sidebar
+        logout={logout}
+        totalTasks={totalTasks}
+        completedTasks={completedTasks}
+        pendingTasks={pendingTasks}
+      />
 
       <DarkModeToggle />
 
@@ -169,10 +175,12 @@ function Dashboard() {
 
           <div className="w-full bg-gray-200 rounded-full h-4">
 
-            <div
+            <motion.div
               className="bg-green-500 h-4 rounded-full"
-              style={{ width: `${progress}%` }}
-            ></div>
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.6 }}
+            />
 
           </div>
 

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
 import API from "../services/api.js"
 import toast from "react-hot-toast"
+import DarkModeToggle from "../components/DarkModeToggle"
 
 function Login() {
 
@@ -54,6 +55,8 @@ function Login() {
 
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-600 dark:from-gray-900 dark:via-gray-800 dark:to-black">
 
+      <DarkModeToggle />
+
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
@@ -93,7 +96,7 @@ function Login() {
         <button
           onClick={handleLogin}
           disabled={loading}
-          className="w-full mt-6 p-3 rounded-lg text-white font-semibold bg-indigo-600 hover:bg-indigo-700 transition-all duration-200 flex items-center justify-center"
+          className="w-full mt-6 p-3 rounded-lg text-white font-semibold bg-indigo-600 hover:bg-indigo-700 transition-all flex justify-center items-center"
         >
 
           {loading ? (

@@ -1,32 +1,38 @@
-import { FaTasks, FaCheckCircle, FaSignOutAlt } from "react-icons/fa"
+import { motion } from "framer-motion"
 
-function Sidebar({ logout }) {
+function Sidebar({ logout, totalTasks, completedTasks, pendingTasks }) {
+
   return (
-    <div className="w-64 min-h-screen bg-gray-900 text-white flex flex-col p-6">
 
-      <h1 className="text-2xl font-bold mb-10">
+    <div className="w-64 bg-gradient-to-b from-indigo-600 to-blue-600 dark:from-gray-800 dark:to-gray-900 text-white min-h-screen p-6 shadow-xl">
+
+      <h2 className="text-2xl font-bold mb-10">
         TaskFlow
-      </h1>
+      </h2>
 
-      <nav className="flex flex-col gap-6">
+      <div className="space-y-6">
 
-        <div className="flex items-center gap-3 hover:text-blue-400 cursor-pointer">
-          <FaTasks />
-          <span>All Tasks</span>
+        <div className="bg-white/20 p-4 rounded-xl text-center">
+          <p className="text-sm">Total Tasks</p>
+          <p className="text-2xl font-bold">{totalTasks}</p>
         </div>
 
-        <div className="flex items-center gap-3 hover:text-green-400 cursor-pointer">
-          <FaCheckCircle />
-          <span>Completed</span>
+        <div className="bg-white/20 p-4 rounded-xl text-center">
+          <p className="text-sm">Completed</p>
+          <p className="text-2xl font-bold">{completedTasks}</p>
         </div>
 
-      </nav>
+        <div className="bg-white/20 p-4 rounded-xl text-center">
+          <p className="text-sm">Pending</p>
+          <p className="text-2xl font-bold">{pendingTasks}</p>
+        </div>
+
+      </div>
 
       <button
         onClick={logout}
-        className="mt-auto flex items-center gap-3 text-red-400 hover:text-red-300"
+        className="mt-10 w-full bg-red-500 hover:bg-red-600 py-2 rounded-lg"
       >
-        <FaSignOutAlt />
         Logout
       </button>
 
