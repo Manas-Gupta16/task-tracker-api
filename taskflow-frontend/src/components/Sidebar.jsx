@@ -1,42 +1,65 @@
-import { motion } from "framer-motion"
+import { LayoutDashboard, CheckCircle, Clock, ListTodo, LogOut } from "lucide-react"
 
-function Sidebar({ logout, totalTasks, completedTasks, pendingTasks }) {
+function Sidebar({ setFilter, logout }) {
 
   return (
 
-    <div className="w-64 bg-gradient-to-b from-indigo-600 to-blue-600 dark:from-gray-800 dark:to-gray-900 text-white min-h-screen p-6 shadow-xl">
+    <div className="w-64 bg-gradient-to-b from-indigo-600 to-blue-600 dark:from-gray-800 dark:to-gray-900 text-white min-h-screen p-6 flex flex-col">
 
-      <h2 className="text-2xl font-bold mb-10">
-        TaskFlow
-      </h2>
+      {/* Logo */}
+      <div className="mb-10">
+        <h2 className="text-2xl font-bold">TaskFlow</h2>
+        <p className="text-sm opacity-80">Productivity Dashboard</p>
+      </div>
 
-      <div className="space-y-6">
+      {/* Navigation */}
+      <div className="space-y-3">
 
-        <div className="bg-white/20 p-4 rounded-xl text-center">
-          <p className="text-sm">Total Tasks</p>
-          <p className="text-2xl font-bold">{totalTasks}</p>
-        </div>
+        <button
+          onClick={() => setFilter("all")}
+          className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-white/20"
+        >
+          <LayoutDashboard size={18} />
+          Dashboard
+        </button>
 
-        <div className="bg-white/20 p-4 rounded-xl text-center">
-          <p className="text-sm">Completed</p>
-          <p className="text-2xl font-bold">{completedTasks}</p>
-        </div>
+        <button
+          onClick={() => setFilter("completed")}
+          className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-white/20"
+        >
+          <CheckCircle size={18} />
+          Completed Tasks
+        </button>
 
-        <div className="bg-white/20 p-4 rounded-xl text-center">
-          <p className="text-sm">Pending</p>
-          <p className="text-2xl font-bold">{pendingTasks}</p>
-        </div>
+        <button
+          onClick={() => setFilter("pending")}
+          className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-white/20"
+        >
+          <Clock size={18} />
+          Pending Tasks
+        </button>
+
+        <button
+          onClick={() => setFilter("all")}
+          className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-white/20"
+        >
+          <ListTodo size={18} />
+          All Tasks
+        </button>
 
       </div>
 
+      {/* Logout */}
       <button
         onClick={logout}
-        className="mt-10 w-full bg-red-500 hover:bg-red-600 py-2 rounded-lg"
+        className="mt-auto flex items-center gap-3 p-3 bg-red-500 rounded-lg hover:bg-red-600"
       >
+        <LogOut size={18}/>
         Logout
       </button>
 
     </div>
+
   )
 }
 

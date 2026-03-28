@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
+import Confetti from "react-confetti"
 import API from "../services/api"
 import toast from "react-hot-toast"
 
@@ -11,34 +12,33 @@ function Dashboard() {
 
   const [tasks, setTasks] = useState([])
   const [title, setTitle] = useState("")
+  const [filter, setFilter] = useState("all")
+  const [confetti, setConfetti] = useState(false)
+
   const navigate = useNavigate()
 
-  // Stats
   const totalTasks = tasks.length
   const completedTasks = tasks.filter(t => t.completed).length
   const pendingTasks = totalTasks - completedTasks
   const progress = totalTasks === 0 ? 0 : (completedTasks / totalTasks) * 100
 
-  // Fetch Tasks
   const fetchTasks = async () => {
+
     try {
 
       const token = localStorage.getItem("token")
 
       const res = await API.get("/tasks", {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
       })
 
       setTasks(res.data)
 
-    } catch (error) {
+    } catch {
       toast.error("Failed to fetch tasks")
     }
   }
 
-  // Add Task
   const addTask = async () => {
 
     if (!title.trim()) {
@@ -53,44 +53,38 @@ function Dashboard() {
       const res = await API.post(
         "/tasks",
         { title },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       )
 
       setTasks([...tasks, res.data])
       setTitle("")
       toast.success("Task added")
 
-    } catch (error) {
+    } catch {
       toast.error("Error adding task")
     }
   }
 
-  // Delete Task
   const deleteTask = async (id) => {
+
     try {
 
       const token = localStorage.getItem("token")
 
       await API.delete(`/tasks/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
       })
 
-      setTasks(tasks.filter(task => task._id !== id))
+      setTasks(tasks.filter(t => t._id !== id))
       toast.success("Task deleted")
 
-    } catch (error) {
+    } catch {
       toast.error("Error deleting task")
     }
   }
 
-  // Toggle Completion
   const toggleComplete = async (task) => {
+
     try {
 
       const token = localStorage.getItem("token")
@@ -98,21 +92,21 @@ function Dashboard() {
       const res = await API.put(
         `/tasks/${task._id}`,
         { completed: !task.completed },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       )
+
+      if (!task.completed) {
+        setConfetti(true)
+        setTimeout(() => setConfetti(false), 3000)
+      }
 
       setTasks(tasks.map(t => t._id === task._id ? res.data : t))
 
-    } catch (error) {
+    } catch {
       toast.error("Error updating task")
     }
   }
 
-  // Logout
   const logout = () => {
     localStorage.removeItem("token")
     navigate("/")
@@ -122,29 +116,29 @@ function Dashboard() {
     fetchTasks()
   }, [])
 
+  const filteredTasks = tasks.filter(task => {
+
+    if (filter === "completed") return task.completed
+    if (filter === "pending") return !task.completed
+    return true
+
+  })
+
   return (
 
-    <div className="flex min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 dark:from-gray-900 dark:via-gray-900 dark:to-black">
+    <div className="flex min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 dark:from-gray-900 dark:to-black">
 
-      <Sidebar
-        logout={logout}
-        totalTasks={totalTasks}
-        completedTasks={completedTasks}
-        pendingTasks={pendingTasks}
-      />
+      {confetti && <Confetti />}
+
+      <Sidebar setFilter={setFilter} logout={logout} />
 
       <DarkModeToggle />
 
       <div className="flex-1 p-10">
 
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-
-          <h1 className="text-3xl font-bold dark:text-white">
-            TaskFlow Dashboard
-          </h1>
-
-        </div>
+        <h1 className="text-3xl font-bold mb-8 dark:text-white">
+          TaskFlow Dashboard
+        </h1>
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-6 mb-8">
@@ -191,9 +185,9 @@ function Dashboard() {
         </div>
 
         {/* Add Task */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow mb-8">
 
-          <div className="flex gap-3 mb-6">
+          <div className="flex gap-3">
 
             <input
               type="text"
@@ -213,19 +207,21 @@ function Dashboard() {
 
           </div>
 
-          {/* Task List */}
-          {tasks.length === 0 ? (
+        </div>
 
-            <p className="text-gray-500 dark:text-gray-400 text-center">
-              No tasks yet. Add your first task 🚀
-            </p>
+        {/* Task List */}
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
 
-          ) : (
+          <AnimatePresence>
 
-            tasks.map(task => (
+            {filteredTasks.map(task => (
 
-              <div
+              <motion.div
                 key={task._id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
                 className="border dark:border-gray-600 p-3 mb-2 rounded-lg flex justify-between items-center"
               >
 
@@ -250,11 +246,11 @@ function Dashboard() {
                   Delete
                 </button>
 
-              </div>
+              </motion.div>
 
-            ))
+            ))}
 
-          )}
+          </AnimatePresence>
 
         </div>
 
