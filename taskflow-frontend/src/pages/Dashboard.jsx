@@ -12,6 +12,8 @@ function Dashboard() {
 
   const [tasks, setTasks] = useState([])
   const [title, setTitle] = useState("")
+  const [priority, setPriority] = useState("medium")
+  const [deadline, setDeadline] = useState("")
   const [filter, setFilter] = useState("all")
   const [confetti, setConfetti] = useState(false)
 
@@ -52,12 +54,15 @@ function Dashboard() {
 
       const res = await API.post(
         "/tasks",
-        { title },
+        { title, priority, deadline },
         { headers: { Authorization: `Bearer ${token}` } }
       )
 
       setTasks([...tasks, res.data])
       setTitle("")
+      setDeadline("")
+      setPriority("medium")
+
       toast.success("Task added")
 
     } catch {
@@ -97,7 +102,7 @@ function Dashboard() {
 
       if (!task.completed) {
         setConfetti(true)
-        setTimeout(() => setConfetti(false), 3000)
+        setTimeout(() => setConfetti(false), 2500)
       }
 
       setTasks(tasks.map(t => t._id === task._id ? res.data : t))
@@ -123,6 +128,12 @@ function Dashboard() {
     return true
 
   })
+
+  const getPriorityColor = (p) => {
+    if (p === "high") return "text-red-500"
+    if (p === "medium") return "text-yellow-500"
+    return "text-green-500"
+  }
 
   return (
 
@@ -187,22 +198,38 @@ function Dashboard() {
         {/* Add Task */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow mb-8">
 
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap">
 
             <input
               type="text"
               placeholder="Enter task..."
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && addTask()}
               className="border p-3 rounded-lg flex-1 dark:bg-gray-700 dark:text-white"
+            />
+
+            <select
+              value={priority}
+              onChange={(e) => setPriority(e.target.value)}
+              className="border p-3 rounded-lg dark:bg-gray-700 dark:text-white"
+            >
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+
+            <input
+              type="date"
+              value={deadline}
+              onChange={(e) => setDeadline(e.target.value)}
+              className="border p-3 rounded-lg dark:bg-gray-700 dark:text-white"
             />
 
             <button
               onClick={addTask}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
             >
-              Add Task
+              Add
             </button>
 
           </div>
@@ -222,7 +249,7 @@ function Dashboard() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.2 }}
-                className="border dark:border-gray-600 p-3 mb-2 rounded-lg flex justify-between items-center"
+                className="border dark:border-gray-600 p-4 mb-3 rounded-lg flex justify-between items-center"
               >
 
                 <div className="flex items-center gap-3">
@@ -233,9 +260,27 @@ function Dashboard() {
                     onChange={() => toggleComplete(task)}
                   />
 
-                  <span className={`${task.completed ? "line-through text-gray-400" : "dark:text-white"}`}>
-                    {task.title}
-                  </span>
+                  <div>
+
+                    <p className={`${task.completed ? "line-through text-gray-400" : "dark:text-white"}`}>
+                      {task.title}
+                    </p>
+
+                    <div className="text-sm flex gap-4">
+
+                      <span className={getPriorityColor(task.priority)}>
+                        {task.priority?.toUpperCase()}
+                      </span>
+
+                      {task.deadline && (
+                        <span className="text-gray-500">
+                          Due: {new Date(task.deadline).toLocaleDateString()}
+                        </span>
+                      )}
+
+                    </div>
+
+                  </div>
 
                 </div>
 
@@ -257,7 +302,6 @@ function Dashboard() {
       </div>
 
     </div>
-
   )
 }
 
