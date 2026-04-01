@@ -39,6 +39,7 @@ function Dashboard() {
     } catch {
       toast.error("Failed to fetch tasks")
     }
+
   }
 
   const addTask = async () => {
@@ -58,16 +59,18 @@ function Dashboard() {
         { headers: { Authorization: `Bearer ${token}` } }
       )
 
-      setTasks([...tasks, res.data])
+      setTasks([res.data, ...tasks])
+
       setTitle("")
-      setDeadline("")
       setPriority("medium")
+      setDeadline("")
 
       toast.success("Task added")
 
     } catch {
       toast.error("Error adding task")
     }
+
   }
 
   const deleteTask = async (id) => {
@@ -81,11 +84,13 @@ function Dashboard() {
       })
 
       setTasks(tasks.filter(t => t._id !== id))
+
       toast.success("Task deleted")
 
     } catch {
       toast.error("Error deleting task")
     }
+
   }
 
   const toggleComplete = async (task) => {
@@ -110,6 +115,7 @@ function Dashboard() {
     } catch {
       toast.error("Error updating task")
     }
+
   }
 
   const logout = () => {
@@ -129,12 +135,6 @@ function Dashboard() {
 
   })
 
-  const getPriorityColor = (p) => {
-    if (p === "high") return "text-red-500"
-    if (p === "medium") return "text-yellow-500"
-    return "text-green-500"
-  }
-
   return (
 
     <div className="flex min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 dark:from-gray-900 dark:to-black">
@@ -142,7 +142,6 @@ function Dashboard() {
       {confetti && <Confetti />}
 
       <Sidebar setFilter={setFilter} logout={logout} />
-
       <DarkModeToggle />
 
       <div className="flex-1 p-10">
@@ -171,41 +170,17 @@ function Dashboard() {
 
         </div>
 
-        {/* Progress */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow mb-8">
-
-          <h3 className="mb-3 font-semibold dark:text-white">
-            Task Completion Progress
-          </h3>
-
-          <div className="w-full bg-gray-200 rounded-full h-4">
-
-            <motion.div
-              className="bg-green-500 h-4 rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.6 }}
-            />
-
-          </div>
-
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-            {Math.round(progress)}% completed
-          </p>
-
-        </div>
-
         {/* Add Task */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow mb-8">
 
-          <div className="flex gap-3 flex-wrap">
+          <div className="grid md:grid-cols-4 gap-3">
 
             <input
               type="text"
               placeholder="Enter task..."
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="border p-3 rounded-lg flex-1 dark:bg-gray-700 dark:text-white"
+              className="border p-3 rounded-lg dark:bg-gray-700 dark:text-white"
             />
 
             <select
@@ -219,7 +194,7 @@ function Dashboard() {
             </select>
 
             <input
-              type="date"
+              type="datetime-local"
               value={deadline}
               onChange={(e) => setDeadline(e.target.value)}
               className="border p-3 rounded-lg dark:bg-gray-700 dark:text-white"
@@ -229,7 +204,7 @@ function Dashboard() {
               onClick={addTask}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
             >
-              Add
+              Add Task
             </button>
 
           </div>
@@ -260,21 +235,26 @@ function Dashboard() {
                     onChange={() => toggleComplete(task)}
                   />
 
-                  <div>
+                  <div className="flex flex-col">
 
-                    <p className={`${task.completed ? "line-through text-gray-400" : "dark:text-white"}`}>
+                    <span className={`${task.completed ? "line-through text-gray-400" : "dark:text-white"}`}>
                       {task.title}
-                    </p>
+                    </span>
 
-                    <div className="text-sm flex gap-4">
+                    <div className="text-sm text-gray-500 flex gap-3">
 
-                      <span className={getPriorityColor(task.priority)}>
-                        {task.priority?.toUpperCase()}
+                      <span className={`
+                        px-2 py-1 rounded text-xs
+                        ${task.priority === "high" && "bg-red-100 text-red-600"}
+                        ${task.priority === "medium" && "bg-yellow-100 text-yellow-600"}
+                        ${task.priority === "low" && "bg-green-100 text-green-600"}
+                      `}>
+                        {task.priority.toUpperCase()}
                       </span>
 
                       {task.deadline && (
-                        <span className="text-gray-500">
-                          Due: {new Date(task.deadline).toLocaleDateString()}
+                        <span>
+                          ⏰ {new Date(task.deadline).toLocaleString()}
                         </span>
                       )}
 
@@ -302,6 +282,7 @@ function Dashboard() {
       </div>
 
     </div>
+
   )
 }
 

@@ -1,71 +1,95 @@
-const Task = require('../models/Task')
+const Task = require("../models/Task")
 
-// Create Task
+// CREATE TASK
 exports.createTask = async (req, res) => {
-    try {
-        const task = await Task.create({
-            user: req.user._id,
-            title: req.body.title
-        })
 
-        res.status(201).json(task)
-    } catch (error) {
-        res.status(500).json({ message: error.message })
-    }
+  try {
+
+    const { title, priority, deadline } = req.body
+
+    const task = await Task.create({
+      user: req.user._id,
+      title,
+      priority,
+      deadline
+    })
+
+    res.status(201).json(task)
+
+  } catch (error) {
+    res.status(500).json({ message: "Server error" })
+  }
+
 }
 
-// Get Tasks
+
+// GET TASKS
 exports.getTasks = async (req, res) => {
-    try {
-        const tasks = await Task.find({ user: req.user._id })
 
-        res.json(tasks)
-    } catch (error) {
-        res.status(500).json({ message: error.message })
-    }
+  try {
+
+    const tasks = await Task.find({ user: req.user._id }).sort({ createdAt: -1 })
+
+    res.json(tasks)
+
+  } catch (error) {
+    res.status(500).json({ message: "Server error" })
+  }
+
 }
 
-// Update Task
+
+// UPDATE TASK
 exports.updateTask = async (req, res) => {
-    try {
-        const task = await Task.findById(req.params.id)
 
-        if (!task) {
-            return res.status(404).json({ message: "Task not found" })
-        }
+  try {
 
-        if (task.user.toString() !== req.user._id.toString()) {
-            return res.status(401).json({ message: 'Not authorized' })
-        }
+    const task = await Task.findById(req.params.id)
 
-        task.title = req.body.title || task.title
-        task.completed = req.body.completed ?? task.completed
-
-        const updatedTask = await task.save()
-
-        res.json(updatedTask)
-    } catch (error) {
-        res.status(500).json({ message: error.message })
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" })
     }
+
+    if (task.user.toString() !== req.user._id.toString()) {
+      return res.status(401).json({ message: "Not authorized" })
+    }
+
+    const updatedTask = await Task.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    )
+
+    res.json(updatedTask)
+
+  } catch (error) {
+    res.status(500).json({ message: "Server error" })
+  }
+
 }
 
-// Delete Task
+
+// DELETE TASK
 exports.deleteTask = async (req, res) => {
-    try {
-        const task = await Task.findById(req.params.id)
 
-        if (!task) {
-            return res.status(404).json({ message: "Task not found" })
-        }
+  try {
 
-        if (task.user.toString() !== req.user._id.toString()) {
-            return res.status(401).json({ message: 'Not authorized' })
-        }
+    const task = await Task.findById(req.params.id)
 
-        await task.deleteOne()
-
-        res.json({ message: "Task deleted" })
-    } catch (error) {
-        res.status(500).json({ message: error.message })
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" })
     }
+
+    if (task.user.toString() !== req.user._id.toString()) {
+      return res.status(401).json({ message: "Not authorized" })
+    }
+
+    await task.deleteOne()
+
+    res.json({ message: "Task removed" })
+
+  } catch (error) {
+    res.status(500).json({ message: "Server error" })
+  }
+
 }
