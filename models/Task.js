@@ -24,10 +24,16 @@ const taskSchema = new mongoose.Schema(
     default: "medium"
   },
 
-  deadline: {
+  startTime: {
+    type: Date,
+    default: null
+  },
+
+  endTime: {
     type: Date,
     default: null
   }
+
 },
 {
   timestamps: true

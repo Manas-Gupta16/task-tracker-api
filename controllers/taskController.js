@@ -5,14 +5,15 @@ exports.createTask = async (req, res) => {
 
   try {
 
-    const { title, priority, deadline } = req.body
+    const { title, priority, startTime, endTime } = req.body
 
     const task = await Task.create({
-      user: req.user._id,
-      title,
-      priority,
-      deadline
-    })
+  user: req.user._id,
+  title,
+  priority,
+  startTime,
+  endTime
+})
 
     res.status(201).json(task)
 

@@ -16,7 +16,10 @@ function Dashboard() {
   const [tasks, setTasks] = useState([])
   const [title, setTitle] = useState("")
   const [priority, setPriority] = useState("medium")
-  const [deadline, setDeadline] = useState(null)
+
+  const [startTime, setStartTime] = useState(null)
+  const [endTime, setEndTime] = useState(null)
+
   const [filter, setFilter] = useState("all")
   const [confetti, setConfetti] = useState(false)
 
@@ -25,7 +28,6 @@ function Dashboard() {
   const totalTasks = tasks.length
   const completedTasks = tasks.filter(t => t.completed).length
   const pendingTasks = totalTasks - completedTasks
-  const progress = totalTasks === 0 ? 0 : (completedTasks / totalTasks) * 100
 
   const fetchTasks = async () => {
 
@@ -58,7 +60,7 @@ function Dashboard() {
 
       const res = await API.post(
         "/tasks",
-        { title, priority, deadline },
+        { title, priority, startTime, endTime },
         { headers: { Authorization: `Bearer ${token}` } }
       )
 
@@ -66,7 +68,8 @@ function Dashboard() {
 
       setTitle("")
       setPriority("medium")
-      setDeadline(null)
+      setStartTime(null)
+      setEndTime(null)
 
       toast.success("Task added")
 
@@ -87,6 +90,7 @@ function Dashboard() {
       })
 
       setTasks(tasks.filter(t => t._id !== id))
+
       toast.success("Task deleted")
 
     } catch {
@@ -129,6 +133,13 @@ function Dashboard() {
     fetchTasks()
   }, [])
 
+  const formatTime = (date) => {
+    return new Date(date).toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit"
+    })
+  }
+
   const filteredTasks = tasks.filter(task => {
 
     if (filter === "completed") return task.completed
@@ -136,15 +147,6 @@ function Dashboard() {
     return true
 
   })
-
-  const formatDeadline = (date) => {
-    return new Date(date).toLocaleString("en-US", {
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit"
-    })
-  }
 
   return (
 
@@ -184,7 +186,7 @@ function Dashboard() {
         {/* Add Task */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow mb-8">
 
-          <div className="grid md:grid-cols-4 gap-4">
+          <div className="grid md:grid-cols-5 gap-4">
 
             <input
               type="text"
@@ -194,33 +196,33 @@ function Dashboard() {
               className="border p-3 rounded-lg dark:bg-gray-700 dark:text-white"
             />
 
-            {/* Priority Dropdown */}
-            <div className="relative">
+            <select
+              value={priority}
+              onChange={(e) => setPriority(e.target.value)}
+              className="border p-3 rounded-lg dark:bg-gray-700 dark:text-white"
+            >
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
 
-              <select
-                value={priority}
-                onChange={(e) => setPriority(e.target.value)}
-                className="border p-3 rounded-lg appearance-none w-full dark:bg-gray-700 dark:text-white"
-              >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
-
-              <div className="absolute right-3 top-3 pointer-events-none text-gray-500">
-                ▼
-              </div>
-
-            </div>
-
-            {/* Date Picker */}
             <DatePicker
-              selected={deadline}
-              onChange={(date) => setDeadline(date)}
+              selected={startTime}
+              onChange={(date) => setStartTime(date)}
               showTimeSelect
               timeIntervals={15}
               dateFormat="MMM d, yyyy h:mm aa"
-              placeholderText="Select deadline"
+              placeholderText="Start time"
+              className="border p-3 rounded-lg w-full dark:bg-gray-700 dark:text-white"
+            />
+
+            <DatePicker
+              selected={endTime}
+              onChange={(date) => setEndTime(date)}
+              showTimeSelect
+              timeIntervals={15}
+              dateFormat="MMM d, yyyy h:mm aa"
+              placeholderText="End time"
               className="border p-3 rounded-lg w-full dark:bg-gray-700 dark:text-white"
             />
 
@@ -276,9 +278,9 @@ function Dashboard() {
                         {task.priority.toUpperCase()}
                       </span>
 
-                      {task.deadline && (
+                      {task.startTime && task.endTime && (
                         <span>
-                          ⏰ {formatDeadline(task.deadline)}
+                          ⏰ {formatTime(task.startTime)} → {formatTime(task.endTime)}
                         </span>
                       )}
 
