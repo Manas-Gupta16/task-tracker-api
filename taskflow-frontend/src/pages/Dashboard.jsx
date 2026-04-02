@@ -2,6 +2,9 @@ import { useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Confetti from "react-confetti"
+import DatePicker from "react-datepicker"
+import "react-datepicker/dist/react-datepicker.css"
+
 import API from "../services/api"
 import toast from "react-hot-toast"
 
@@ -13,7 +16,7 @@ function Dashboard() {
   const [tasks, setTasks] = useState([])
   const [title, setTitle] = useState("")
   const [priority, setPriority] = useState("medium")
-  const [deadline, setDeadline] = useState("")
+  const [deadline, setDeadline] = useState(null)
   const [filter, setFilter] = useState("all")
   const [confetti, setConfetti] = useState(false)
 
@@ -63,7 +66,7 @@ function Dashboard() {
 
       setTitle("")
       setPriority("medium")
-      setDeadline("")
+      setDeadline(null)
 
       toast.success("Task added")
 
@@ -84,7 +87,6 @@ function Dashboard() {
       })
 
       setTasks(tasks.filter(t => t._id !== id))
-
       toast.success("Task deleted")
 
     } catch {
@@ -135,6 +137,15 @@ function Dashboard() {
 
   })
 
+  const formatDeadline = (date) => {
+    return new Date(date).toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit"
+    })
+  }
+
   return (
 
     <div className="flex min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 dark:from-gray-900 dark:to-black">
@@ -173,7 +184,7 @@ function Dashboard() {
         {/* Add Task */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow mb-8">
 
-          <div className="grid md:grid-cols-4 gap-3">
+          <div className="grid md:grid-cols-4 gap-4">
 
             <input
               type="text"
@@ -183,26 +194,39 @@ function Dashboard() {
               className="border p-3 rounded-lg dark:bg-gray-700 dark:text-white"
             />
 
-            <select
-              value={priority}
-              onChange={(e) => setPriority(e.target.value)}
-              className="border p-3 rounded-lg dark:bg-gray-700 dark:text-white"
-            >
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-            </select>
+            {/* Priority Dropdown */}
+            <div className="relative">
 
-            <input
-              type="datetime-local"
-              value={deadline}
-              onChange={(e) => setDeadline(e.target.value)}
-              className="border p-3 rounded-lg dark:bg-gray-700 dark:text-white"
+              <select
+                value={priority}
+                onChange={(e) => setPriority(e.target.value)}
+                className="border p-3 rounded-lg appearance-none w-full dark:bg-gray-700 dark:text-white"
+              >
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+
+              <div className="absolute right-3 top-3 pointer-events-none text-gray-500">
+                ▼
+              </div>
+
+            </div>
+
+            {/* Date Picker */}
+            <DatePicker
+              selected={deadline}
+              onChange={(date) => setDeadline(date)}
+              showTimeSelect
+              timeIntervals={15}
+              dateFormat="MMM d, yyyy h:mm aa"
+              placeholderText="Select deadline"
+              className="border p-3 rounded-lg w-full dark:bg-gray-700 dark:text-white"
             />
 
             <button
               onClick={addTask}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+              className="bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               Add Task
             </button>
@@ -241,10 +265,10 @@ function Dashboard() {
                       {task.title}
                     </span>
 
-                    <div className="text-sm text-gray-500 flex gap-3">
+                    <div className="text-sm text-gray-500 flex gap-3 mt-1">
 
                       <span className={`
-                        px-2 py-1 rounded text-xs
+                        px-2 py-1 rounded text-xs font-semibold
                         ${task.priority === "high" && "bg-red-100 text-red-600"}
                         ${task.priority === "medium" && "bg-yellow-100 text-yellow-600"}
                         ${task.priority === "low" && "bg-green-100 text-green-600"}
@@ -254,7 +278,7 @@ function Dashboard() {
 
                       {task.deadline && (
                         <span>
-                          ⏰ {new Date(task.deadline).toLocaleString()}
+                          ⏰ {formatDeadline(task.deadline)}
                         </span>
                       )}
 
