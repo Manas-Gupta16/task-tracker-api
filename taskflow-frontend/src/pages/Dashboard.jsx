@@ -140,6 +140,26 @@ function Dashboard() {
     })
   }
 
+  // Smart deadline detection
+  const getTaskStatus = (task) => {
+
+    if (!task.startTime || !task.endTime) return null
+
+    const now = new Date()
+    const start = new Date(task.startTime)
+    const end = new Date(task.endTime)
+
+    if (now > end) {
+      return { label: "Overdue", color: "text-red-500" }
+    }
+
+    if (now >= start && now <= end) {
+      return { label: "Happening Now", color: "text-yellow-500" }
+    }
+
+    return { label: "Upcoming", color: "text-green-500" }
+  }
+
   const filteredTasks = tasks.filter(task => {
 
     if (filter === "completed") return task.completed
@@ -210,7 +230,6 @@ function Dashboard() {
               selected={startTime}
               onChange={(date) => setStartTime(date)}
               showTimeSelect
-              timeIntervals={15}
               dateFormat="MMM d, yyyy h:mm aa"
               placeholderText="Start time"
               className="border p-3 rounded-lg w-full dark:bg-gray-700 dark:text-white"
@@ -220,7 +239,6 @@ function Dashboard() {
               selected={endTime}
               onChange={(date) => setEndTime(date)}
               showTimeSelect
-              timeIntervals={15}
               dateFormat="MMM d, yyyy h:mm aa"
               placeholderText="End time"
               className="border p-3 rounded-lg w-full dark:bg-gray-700 dark:text-white"
@@ -242,64 +260,76 @@ function Dashboard() {
 
           <AnimatePresence>
 
-            {filteredTasks.map(task => (
+            {filteredTasks.map(task => {
 
-              <motion.div
-                key={task._id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.2 }}
-                className="border dark:border-gray-600 p-4 mb-3 rounded-lg flex justify-between items-center"
-              >
+              const status = getTaskStatus(task)
 
-                <div className="flex items-center gap-3">
+              return (
 
-                  <input
-                    type="checkbox"
-                    checked={task.completed}
-                    onChange={() => toggleComplete(task)}
-                  />
+                <motion.div
+                  key={task._id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.2 }}
+                  className="border dark:border-gray-600 p-4 mb-3 rounded-lg flex justify-between items-center"
+                >
 
-                  <div className="flex flex-col">
+                  <div className="flex items-center gap-3">
 
-                    <span className={`${task.completed ? "line-through text-gray-400" : "dark:text-white"}`}>
-                      {task.title}
-                    </span>
+                    <input
+                      type="checkbox"
+                      checked={task.completed}
+                      onChange={() => toggleComplete(task)}
+                    />
 
-                    <div className="text-sm text-gray-500 flex gap-3 mt-1">
+                    <div className="flex flex-col">
 
-                      <span className={`
-                        px-2 py-1 rounded text-xs font-semibold
-                        ${task.priority === "high" && "bg-red-100 text-red-600"}
-                        ${task.priority === "medium" && "bg-yellow-100 text-yellow-600"}
-                        ${task.priority === "low" && "bg-green-100 text-green-600"}
-                      `}>
-                        {task.priority.toUpperCase()}
+                      <span className={`${task.completed ? "line-through text-gray-400" : "dark:text-white"}`}>
+                        {task.title}
                       </span>
 
-                      {task.startTime && task.endTime && (
-                        <span>
-                          ⏰ {formatTime(task.startTime)} → {formatTime(task.endTime)}
+                      <div className="text-sm text-gray-500 flex gap-3 mt-1">
+
+                        <span className={`
+                          px-2 py-1 rounded text-xs font-semibold
+                          ${task.priority === "high" && "bg-red-100 text-red-600"}
+                          ${task.priority === "medium" && "bg-yellow-100 text-yellow-600"}
+                          ${task.priority === "low" && "bg-green-100 text-green-600"}
+                        `}>
+                          {task.priority.toUpperCase()}
                         </span>
-                      )}
+
+                        {task.startTime && task.endTime && (
+                          <span>
+                            ⏰ {formatTime(task.startTime)} → {formatTime(task.endTime)}
+                          </span>
+                        )}
+
+                        {status && (
+                          <span className={`font-semibold ${status.color}`}>
+                            {status.label}
+                          </span>
+                        )}
+
+                      </div>
 
                     </div>
 
                   </div>
 
-                </div>
+                  <button
+                    onClick={() => deleteTask(task._id)}
+                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                  >
+                    Delete
+                  </button>
 
-                <button
-                  onClick={() => deleteTask(task._id)}
-                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                >
-                  Delete
-                </button>
+                </motion.div>
 
-              </motion.div>
+              )
 
-            ))}
+            })}
 
           </AnimatePresence>
 
