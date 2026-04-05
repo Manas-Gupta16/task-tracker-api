@@ -20,6 +20,8 @@ function Dashboard() {
   const [startTime, setStartTime] = useState(null)
   const [endTime, setEndTime] = useState(null)
 
+  const [editingTask, setEditingTask] = useState(null)
+
   const [filter, setFilter] = useState("all")
   const [confetti, setConfetti] = useState(false)
 
@@ -28,6 +30,10 @@ function Dashboard() {
   const totalTasks = tasks.length
   const completedTasks = tasks.filter(t => t.completed).length
   const pendingTasks = totalTasks - completedTasks
+
+  useEffect(() => {
+    fetchTasks()
+  }, [])
 
   const fetchTasks = async () => {
 
@@ -116,10 +122,60 @@ function Dashboard() {
         setTimeout(() => setConfetti(false), 2500)
       }
 
-      setTasks(tasks.map(t => t._id === task._id ? res.data : t))
+      setTasks(tasks.map(t =>
+        t._id === task._id ? res.data : t
+      ))
 
     } catch {
       toast.error("Error updating task")
+    }
+
+  }
+
+  const startEdit = (task) => {
+
+    setEditingTask({
+      _id: task._id,
+      title: task.title,
+      priority: task.priority,
+      startTime: task.startTime ? new Date(task.startTime) : null,
+      endTime: task.endTime ? new Date(task.endTime) : null
+    })
+
+  }
+
+  const saveEdit = async () => {
+
+    try {
+
+      const token = localStorage.getItem("token")
+
+      const updatedTask = {
+        title: editingTask.title,
+        priority: editingTask.priority,
+        startTime: editingTask.startTime,
+        endTime: editingTask.endTime
+      }
+
+      const res = await API.put(
+        `/tasks/${editingTask._id}`,
+        updatedTask,
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+
+      setTasks(tasks.map(t =>
+        t._id === editingTask._id ? res.data : t
+      ))
+
+      setEditingTask(null)
+
+      toast.success("Task updated")
+
+    } catch (err) {
+
+      console.error(err)
+      toast.error("Update failed")
+
     }
 
   }
@@ -129,18 +185,15 @@ function Dashboard() {
     navigate("/")
   }
 
-  useEffect(() => {
-    fetchTasks()
-  }, [])
-
   const formatTime = (date) => {
+
     return new Date(date).toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit"
     })
+
   }
 
-  // Smart deadline detection
   const getTaskStatus = (task) => {
 
     if (!task.startTime || !task.endTime) return null
@@ -149,21 +202,18 @@ function Dashboard() {
     const start = new Date(task.startTime)
     const end = new Date(task.endTime)
 
-    if (now > end) {
-      return { label: "Overdue", color: "text-red-500" }
-    }
-
-    if (now >= start && now <= end) {
-      return { label: "Happening Now", color: "text-yellow-500" }
-    }
+    if (now > end) return { label: "Overdue", color: "text-red-500" }
+    if (now >= start && now <= end) return { label: "Happening Now", color: "text-yellow-500" }
 
     return { label: "Upcoming", color: "text-green-500" }
+
   }
 
   const filteredTasks = tasks.filter(task => {
 
     if (filter === "completed") return task.completed
     if (filter === "pending") return !task.completed
+
     return true
 
   })
@@ -184,6 +234,7 @@ function Dashboard() {
         </h1>
 
         {/* Stats */}
+
         <div className="grid grid-cols-3 gap-6 mb-8">
 
           <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow text-center">
@@ -204,6 +255,7 @@ function Dashboard() {
         </div>
 
         {/* Add Task */}
+
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow mb-8">
 
           <div className="grid md:grid-cols-5 gap-4">
@@ -256,6 +308,7 @@ function Dashboard() {
         </div>
 
         {/* Task List */}
+
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
 
           <AnimatePresence>
@@ -275,55 +328,122 @@ function Dashboard() {
                   className="border dark:border-gray-600 p-4 mb-3 rounded-lg flex justify-between items-center"
                 >
 
-                  <div className="flex items-center gap-3">
+                  {editingTask && editingTask._id === task._id ? (
 
-                    <input
-                      type="checkbox"
-                      checked={task.completed}
-                      onChange={() => toggleComplete(task)}
-                    />
+                    <div className="grid md:grid-cols-5 gap-3 w-full">
 
-                    <div className="flex flex-col">
+                      <input
+                        value={editingTask.title}
+                        onChange={(e) =>
+                          setEditingTask({ ...editingTask, title: e.target.value })
+                        }
+                        className="border p-2 rounded"
+                      />
 
-                      <span className={`${task.completed ? "line-through text-gray-400" : "dark:text-white"}`}>
-                        {task.title}
-                      </span>
+                      <select
+                        value={editingTask.priority}
+                        onChange={(e) =>
+                          setEditingTask({ ...editingTask, priority: e.target.value })
+                        }
+                        className="border p-2 rounded"
+                      >
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                      </select>
 
-                      <div className="text-sm text-gray-500 flex gap-3 mt-1">
+                      <DatePicker
+                        selected={editingTask.startTime}
+                        onChange={(date) =>
+                          setEditingTask({ ...editingTask, startTime: date })
+                        }
+                        showTimeSelect
+                        dateFormat="MMM d h:mm aa"
+                        className="border p-2 rounded"
+                      />
 
-                        <span className={`
-                          px-2 py-1 rounded text-xs font-semibold
-                          ${task.priority === "high" && "bg-red-100 text-red-600"}
-                          ${task.priority === "medium" && "bg-yellow-100 text-yellow-600"}
-                          ${task.priority === "low" && "bg-green-100 text-green-600"}
-                        `}>
-                          {task.priority.toUpperCase()}
-                        </span>
+                      <DatePicker
+                        selected={editingTask.endTime}
+                        onChange={(date) =>
+                          setEditingTask({ ...editingTask, endTime: date })
+                        }
+                        showTimeSelect
+                        dateFormat="MMM d h:mm aa"
+                        className="border p-2 rounded"
+                      />
 
-                        {task.startTime && task.endTime && (
-                          <span>
-                            ⏰ {formatTime(task.startTime)} → {formatTime(task.endTime)}
+                      <button
+                        onClick={saveEdit}
+                        className="bg-green-600 text-white rounded"
+                      >
+                        Save
+                      </button>
+
+                    </div>
+
+                  ) : (
+
+                    <div className="flex items-center justify-between w-full">
+
+                      <div className="flex items-center gap-3">
+
+                        <input
+                          type="checkbox"
+                          checked={task.completed}
+                          onChange={() => toggleComplete(task)}
+                        />
+
+                        <div>
+
+                          <span className={`font-medium ${task.completed ? "line-through text-gray-400" : "dark:text-white"}`}>
+                            {task.title}
                           </span>
-                        )}
 
-                        {status && (
-                          <span className={`font-semibold ${status.color}`}>
-                            {status.label}
-                          </span>
-                        )}
+                          <div className="text-sm flex gap-3 mt-1">
+
+                            <span className="uppercase text-gray-500">
+                              {task.priority}
+                            </span>
+
+                            {task.startTime && task.endTime && (
+                              <span>
+                                ⏰ {formatTime(task.startTime)} → {formatTime(task.endTime)}
+                              </span>
+                            )}
+
+                            {status && (
+                              <span className={status.color}>
+                                {status.label}
+                              </span>
+                            )}
+
+                          </div>
+
+                        </div>
+
+                      </div>
+
+                      <div className="flex gap-3">
+
+                        <button
+                          onClick={() => startEdit(task)}
+                          className="text-blue-600"
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          onClick={() => deleteTask(task._id)}
+                          className="text-red-600"
+                        >
+                          Delete
+                        </button>
 
                       </div>
 
                     </div>
 
-                  </div>
-
-                  <button
-                    onClick={() => deleteTask(task._id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                  >
-                    Delete
-                  </button>
+                  )}
 
                 </motion.div>
 
@@ -340,6 +460,7 @@ function Dashboard() {
     </div>
 
   )
+
 }
 
 export default Dashboard
