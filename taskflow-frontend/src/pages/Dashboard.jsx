@@ -23,6 +23,8 @@ function Dashboard() {
   const [editingTask, setEditingTask] = useState(null)
 
   const [filter, setFilter] = useState("all")
+  const [search, setSearch] = useState("")   // NEW SEARCH STATE
+
   const [confetti, setConfetti] = useState(false)
 
   const navigate = useNavigate()
@@ -114,8 +116,8 @@ function Dashboard() {
       const res = await API.put(
         `/tasks/${task._id}`,
         { completed: !task.completed },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
+        { headers: { Authorization: `Bearer ${token}` }
+      })
 
       if (!task.completed) {
         setConfetti(true)
@@ -211,10 +213,18 @@ function Dashboard() {
 
   const filteredTasks = tasks.filter(task => {
 
-    if (filter === "completed") return task.completed
-    if (filter === "pending") return !task.completed
+    const matchesFilter =
+      filter === "completed"
+        ? task.completed
+        : filter === "pending"
+        ? !task.completed
+        : true
 
-    return true
+    const matchesSearch = task.title
+      .toLowerCase()
+      .includes(search.toLowerCase())
+
+    return matchesFilter && matchesSearch
 
   })
 
@@ -251,6 +261,20 @@ function Dashboard() {
             <h3 className="text-gray-500 dark:text-gray-300">Pending</h3>
             <p className="text-3xl font-bold text-red-500">{pendingTasks}</p>
           </div>
+
+        </div>
+
+        {/* Search */}
+
+        <div className="mb-6">
+
+          <input
+            type="text"
+            placeholder="Search tasks..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="border p-3 rounded-lg w-full dark:bg-gray-700 dark:text-white"
+          />
 
         </div>
 
