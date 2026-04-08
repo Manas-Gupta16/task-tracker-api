@@ -198,18 +198,23 @@ function Dashboard() {
 
   const getTaskStatus = (task) => {
 
-    if (!task.startTime || !task.endTime) return null
+  if (!task.startTime || !task.endTime) return null
 
-    const now = new Date()
-    const start = new Date(task.startTime)
-    const end = new Date(task.endTime)
+  const now = new Date().getTime()
+  const start = new Date(task.startTime).getTime()
+  const end = new Date(task.endTime).getTime()
 
-    if (now > end) return { label: "Overdue", color: "text-red-500" }
-    if (now >= start && now <= end) return { label: "Happening Now", color: "text-yellow-500" }
-
-    return { label: "Upcoming", color: "text-green-500" }
-
+  if (now > end) {
+    return { label: "Overdue", color: "text-red-500" }
   }
+
+  if (now >= start && now <= end) {
+    return { label: "Happening Now", color: "text-yellow-500" }
+  }
+
+  return { label: "Upcoming", color: "text-green-500" }
+
+}
 
   const filteredTasks = tasks.filter(task => {
 
@@ -425,9 +430,9 @@ function Dashboard() {
 
                           <div className="text-sm flex gap-3 mt-1">
 
-                            <span className="uppercase text-gray-500">
-                              {task.priority}
-                            </span>
+                            <span className="text-gray-500 font-semibold">
+  {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+</span>
 
                             {task.startTime && task.endTime && (
                               <span>
