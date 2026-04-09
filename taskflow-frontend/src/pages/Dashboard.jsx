@@ -23,7 +23,7 @@ function Dashboard() {
   const [editingTask, setEditingTask] = useState(null)
 
   const [filter, setFilter] = useState("all")
-  const [search, setSearch] = useState("")   // NEW SEARCH STATE
+  const [search, setSearch] = useState("")
 
   const [confetti, setConfetti] = useState(false)
 
@@ -116,12 +116,12 @@ function Dashboard() {
       const res = await API.put(
         `/tasks/${task._id}`,
         { completed: !task.completed },
-        { headers: { Authorization: `Bearer ${token}` }
-      })
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
 
       if (!task.completed) {
         setConfetti(true)
-        setTimeout(() => setConfetti(false), 2500)
+        setTimeout(() => setConfetti(false), 2000)
       }
 
       setTasks(tasks.map(t =>
@@ -173,9 +173,8 @@ function Dashboard() {
 
       toast.success("Task updated")
 
-    } catch (err) {
+    } catch {
 
-      console.error(err)
       toast.error("Update failed")
 
     }
@@ -198,23 +197,36 @@ function Dashboard() {
 
   const getTaskStatus = (task) => {
 
-  if (!task.startTime || !task.endTime) return null
+    if (!task.startTime || !task.endTime) return null
 
-  const now = new Date().getTime()
-  const start = new Date(task.startTime).getTime()
-  const end = new Date(task.endTime).getTime()
+    const now = new Date().getTime()
+    const start = new Date(task.startTime).getTime()
+    const end = new Date(task.endTime).getTime()
 
-  if (now > end) {
-    return { label: "Overdue", color: "text-red-500" }
+    if (now > end) return { label: "Overdue", color: "text-red-500" }
+
+    if (now >= start && now <= end)
+      return { label: "Happening Now", color: "text-yellow-500" }
+
+    return { label: "Upcoming", color: "text-green-500" }
+
   }
 
-  if (now >= start && now <= end) {
-    return { label: "Happening Now", color: "text-yellow-500" }
+  const getPriorityStyle = (priority) => {
+
+    if (priority === "high")
+      return "bg-red-100 text-red-600 px-2 py-1 rounded text-xs font-semibold"
+
+    if (priority === "medium")
+      return "bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-semibold"
+
+    return "bg-green-100 text-green-600 px-2 py-1 rounded text-xs font-semibold"
+
   }
 
-  return { label: "Upcoming", color: "text-green-500" }
-
-}
+  const formatPriority = (p) => {
+    return p.charAt(0).toUpperCase() + p.slice(1)
+  }
 
   const filteredTasks = tasks.filter(task => {
 
@@ -252,36 +264,21 @@ function Dashboard() {
 
         <div className="grid grid-cols-3 gap-6 mb-8">
 
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow text-center">
-            <h3 className="text-gray-500 dark:text-gray-300">Total Tasks</h3>
-            <p className="text-3xl font-bold dark:text-white">{totalTasks}</p>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow text-center">
-            <h3 className="text-gray-500 dark:text-gray-300">Completed</h3>
-            <p className="text-3xl font-bold text-green-600">{completedTasks}</p>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow text-center">
-            <h3 className="text-gray-500 dark:text-gray-300">Pending</h3>
-            <p className="text-3xl font-bold text-red-500">{pendingTasks}</p>
-          </div>
+          <StatCard title="Total Tasks" value={totalTasks} />
+          <StatCard title="Completed" value={completedTasks} color="text-green-600" />
+          <StatCard title="Pending" value={pendingTasks} color="text-red-500" />
 
         </div>
 
         {/* Search */}
 
-        <div className="mb-6">
-
-          <input
-            type="text"
-            placeholder="Search tasks..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="border p-3 rounded-lg w-full dark:bg-gray-700 dark:text-white"
-          />
-
-        </div>
+        <input
+          type="text"
+          placeholder="Search tasks..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="border p-3 rounded-lg w-full mb-6 dark:bg-gray-700 dark:text-white"
+        />
 
         {/* Add Task */}
 
@@ -357,122 +354,61 @@ function Dashboard() {
                   className="border dark:border-gray-600 p-4 mb-3 rounded-lg flex justify-between items-center"
                 >
 
-                  {editingTask && editingTask._id === task._id ? (
+                  <div className="flex items-center gap-3">
 
-                    <div className="grid md:grid-cols-5 gap-3 w-full">
+                    <input
+                      type="checkbox"
+                      checked={task.completed}
+                      onChange={() => toggleComplete(task)}
+                    />
 
-                      <input
-                        value={editingTask.title}
-                        onChange={(e) =>
-                          setEditingTask({ ...editingTask, title: e.target.value })
-                        }
-                        className="border p-2 rounded"
-                      />
+                    <div>
 
-                      <select
-                        value={editingTask.priority}
-                        onChange={(e) =>
-                          setEditingTask({ ...editingTask, priority: e.target.value })
-                        }
-                        className="border p-2 rounded"
-                      >
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
-                      </select>
+                      <span className={`font-medium ${task.completed ? "line-through text-gray-400" : "dark:text-white"}`}>
+                        {task.title}
+                      </span>
 
-                      <DatePicker
-                        selected={editingTask.startTime}
-                        onChange={(date) =>
-                          setEditingTask({ ...editingTask, startTime: date })
-                        }
-                        showTimeSelect
-                        dateFormat="MMM d h:mm aa"
-                        className="border p-2 rounded"
-                      />
+                      <div className="text-sm flex gap-3 mt-1 items-center">
 
-                      <DatePicker
-                        selected={editingTask.endTime}
-                        onChange={(date) =>
-                          setEditingTask({ ...editingTask, endTime: date })
-                        }
-                        showTimeSelect
-                        dateFormat="MMM d h:mm aa"
-                        className="border p-2 rounded"
-                      />
+                        <span className={getPriorityStyle(task.priority)}>
+                          {formatPriority(task.priority)}
+                        </span>
 
-                      <button
-                        onClick={saveEdit}
-                        className="bg-green-600 text-white rounded"
-                      >
-                        Save
-                      </button>
-
-                    </div>
-
-                  ) : (
-
-                    <div className="flex items-center justify-between w-full">
-
-                      <div className="flex items-center gap-3">
-
-                        <input
-                          type="checkbox"
-                          checked={task.completed}
-                          onChange={() => toggleComplete(task)}
-                        />
-
-                        <div>
-
-                          <span className={`font-medium ${task.completed ? "line-through text-gray-400" : "dark:text-white"}`}>
-                            {task.title}
+                        {task.startTime && task.endTime && (
+                          <span>
+                            ⏰ {formatTime(task.startTime)} → {formatTime(task.endTime)}
                           </span>
+                        )}
 
-                          <div className="text-sm flex gap-3 mt-1">
-
-                            <span className="text-gray-500 font-semibold">
-  {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-</span>
-
-                            {task.startTime && task.endTime && (
-                              <span>
-                                ⏰ {formatTime(task.startTime)} → {formatTime(task.endTime)}
-                              </span>
-                            )}
-
-                            {status && (
-                              <span className={status.color}>
-                                {status.label}
-                              </span>
-                            )}
-
-                          </div>
-
-                        </div>
-
-                      </div>
-
-                      <div className="flex gap-3">
-
-                        <button
-                          onClick={() => startEdit(task)}
-                          className="text-blue-600"
-                        >
-                          Edit
-                        </button>
-
-                        <button
-                          onClick={() => deleteTask(task._id)}
-                          className="text-red-600"
-                        >
-                          Delete
-                        </button>
+                        {status && (
+                          <span className={`font-semibold ${status.color}`}>
+                            {status.label}
+                          </span>
+                        )}
 
                       </div>
 
                     </div>
 
-                  )}
+                  </div>
+
+                  <div className="flex gap-3">
+
+                    <button
+                      onClick={() => startEdit(task)}
+                      className="text-blue-600"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      onClick={() => deleteTask(task._id)}
+                      className="text-red-600"
+                    >
+                      Delete
+                    </button>
+
+                  </div>
 
                 </motion.div>
 
@@ -485,6 +421,24 @@ function Dashboard() {
         </div>
 
       </div>
+
+    </div>
+
+  )
+
+}
+
+function StatCard({ title, value, color }) {
+
+  return (
+
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow text-center">
+
+      <h3 className="text-gray-500 dark:text-gray-300">{title}</h3>
+
+      <p className={`text-3xl font-bold ${color || "dark:text-white"}`}>
+        {value}
+      </p>
 
     </div>
 
