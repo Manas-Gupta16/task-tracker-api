@@ -50,7 +50,9 @@ function Dashboard() {
       setTasks(res.data)
 
     } catch {
+
       toast.error("Failed to fetch tasks")
+
     }
 
   }
@@ -72,7 +74,7 @@ function Dashboard() {
         { headers: { Authorization: `Bearer ${token}` } }
       )
 
-      setTasks([res.data, ...tasks])
+      setTasks(prev => [res.data, ...prev])
 
       setTitle("")
       setPriority("medium")
@@ -82,7 +84,9 @@ function Dashboard() {
       toast.success("Task added")
 
     } catch {
+
       toast.error("Error adding task")
+
     }
 
   }
@@ -97,12 +101,14 @@ function Dashboard() {
         headers: { Authorization: `Bearer ${token}` }
       })
 
-      setTasks(tasks.filter(t => t._id !== id))
+      setTasks(prev => prev.filter(t => t._id !== id))
 
       toast.success("Task deleted")
 
     } catch {
+
       toast.error("Error deleting task")
+
     }
 
   }
@@ -119,17 +125,21 @@ function Dashboard() {
         { headers: { Authorization: `Bearer ${token}` } }
       )
 
+      setTasks(prev =>
+        prev.map(t =>
+          t._id === task._id ? res.data : t
+        )
+      )
+
       if (!task.completed) {
         setConfetti(true)
         setTimeout(() => setConfetti(false), 2000)
       }
 
-      setTasks(tasks.map(t =>
-        t._id === task._id ? res.data : t
-      ))
-
     } catch {
+
       toast.error("Error updating task")
+
     }
 
   }
@@ -165,9 +175,11 @@ function Dashboard() {
         { headers: { Authorization: `Bearer ${token}` } }
       )
 
-      setTasks(tasks.map(t =>
-        t._id === editingTask._id ? res.data : t
-      ))
+      setTasks(prev =>
+        prev.map(t =>
+          t._id === editingTask._id ? res.data : t
+        )
+      )
 
       setEditingTask(null)
 
@@ -333,7 +345,7 @@ function Dashboard() {
 
         </div>
 
-        {/* Task List */}
+        {/* Tasks */}
 
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
 
@@ -350,7 +362,6 @@ function Dashboard() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.2 }}
                   className="border dark:border-gray-600 p-4 mb-3 rounded-lg flex justify-between items-center"
                 >
 
