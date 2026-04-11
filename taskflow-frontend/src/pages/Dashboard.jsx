@@ -38,9 +38,7 @@ function Dashboard() {
   }, [])
 
   const fetchTasks = async () => {
-
     try {
-
       const token = localStorage.getItem("token")
 
       const res = await API.get("/tasks", {
@@ -50,11 +48,8 @@ function Dashboard() {
       setTasks(res.data)
 
     } catch {
-
       toast.error("Failed to fetch tasks")
-
     }
-
   }
 
   const addTask = async () => {
@@ -84,9 +79,7 @@ function Dashboard() {
       toast.success("Task added")
 
     } catch {
-
       toast.error("Error adding task")
-
     }
 
   }
@@ -106,9 +99,7 @@ function Dashboard() {
       toast.success("Task deleted")
 
     } catch {
-
       toast.error("Error deleting task")
-
     }
 
   }
@@ -137,9 +128,7 @@ function Dashboard() {
       }
 
     } catch {
-
       toast.error("Error updating task")
-
     }
 
   }
@@ -186,9 +175,7 @@ function Dashboard() {
       toast.success("Task updated")
 
     } catch {
-
       toast.error("Update failed")
-
     }
 
   }
@@ -273,17 +260,13 @@ function Dashboard() {
         </h1>
 
         {/* Stats */}
-
         <div className="grid grid-cols-3 gap-6 mb-8">
-
           <StatCard title="Total Tasks" value={totalTasks} />
           <StatCard title="Completed" value={completedTasks} color="text-green-600" />
           <StatCard title="Pending" value={pendingTasks} color="text-red-500" />
-
         </div>
 
         {/* Search */}
-
         <input
           type="text"
           placeholder="Search tasks..."
@@ -293,9 +276,7 @@ function Dashboard() {
         />
 
         {/* Add Task */}
-
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow mb-8">
-
           <div className="grid md:grid-cols-5 gap-4">
 
             <input
@@ -320,8 +301,6 @@ function Dashboard() {
               selected={startTime}
               onChange={(date) => setStartTime(date)}
               showTimeSelect
-              dateFormat="MMM d, yyyy h:mm aa"
-              placeholderText="Start time"
               className="border p-3 rounded-lg w-full dark:bg-gray-700 dark:text-white"
             />
 
@@ -329,8 +308,6 @@ function Dashboard() {
               selected={endTime}
               onChange={(date) => setEndTime(date)}
               showTimeSelect
-              dateFormat="MMM d, yyyy h:mm aa"
-              placeholderText="End time"
               className="border p-3 rounded-lg w-full dark:bg-gray-700 dark:text-white"
             />
 
@@ -342,16 +319,14 @@ function Dashboard() {
             </button>
 
           </div>
-
         </div>
 
         {/* Tasks */}
-
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
 
           <AnimatePresence>
 
-            {filteredTasks.map(task => {
+            {filteredTasks.map((task) => {
 
               const status = getTaskStatus(task)
 
@@ -362,64 +337,131 @@ function Dashboard() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  className="border dark:border-gray-600 p-4 mb-3 rounded-lg flex justify-between items-center"
+                  transition={{ duration: 0.2 }}
+                  className="border dark:border-gray-600 p-4 mb-3 rounded-lg"
                 >
 
-                  <div className="flex items-center gap-3">
+                  {editingTask && editingTask._id === task._id ? (
 
-                    <input
-                      type="checkbox"
-                      checked={task.completed}
-                      onChange={() => toggleComplete(task)}
-                    />
+                    <div className="flex flex-wrap gap-3 w-full items-center">
 
-                    <div>
+                      <input
+                        value={editingTask.title}
+                        onChange={(e) =>
+                          setEditingTask({ ...editingTask, title: e.target.value })
+                        }
+                        className="border p-2 rounded"
+                      />
 
-                      <span className={`font-medium ${task.completed ? "line-through text-gray-400" : "dark:text-white"}`}>
-                        {task.title}
-                      </span>
+                      <select
+                        value={editingTask.priority}
+                        onChange={(e) =>
+                          setEditingTask({ ...editingTask, priority: e.target.value })
+                        }
+                        className="border p-2 rounded"
+                      >
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                      </select>
 
-                      <div className="text-sm flex gap-3 mt-1 items-center">
+                      <DatePicker
+                        selected={editingTask.startTime}
+                        onChange={(date) =>
+                          setEditingTask({ ...editingTask, startTime: date })
+                        }
+                        showTimeSelect
+                        className="border p-2 rounded"
+                      />
 
-                        <span className={getPriorityStyle(task.priority)}>
-                          {formatPriority(task.priority)}
-                        </span>
+                      <DatePicker
+                        selected={editingTask.endTime}
+                        onChange={(date) =>
+                          setEditingTask({ ...editingTask, endTime: date })
+                        }
+                        showTimeSelect
+                        className="border p-2 rounded"
+                      />
 
-                        {task.startTime && task.endTime && (
-                          <span>
-                            ⏰ {formatTime(task.startTime)} → {formatTime(task.endTime)}
+                      <button
+                        onClick={saveEdit}
+                        className="bg-green-600 text-white px-3 rounded"
+                      >
+                        Save
+                      </button>
+
+                      <button
+                        onClick={() => setEditingTask(null)}
+                        className="bg-gray-500 text-white px-3 rounded"
+                      >
+                        Cancel
+                      </button>
+
+                    </div>
+
+                  ) : (
+
+                    <div className="flex items-center justify-between">
+
+                      <div className="flex items-center gap-3">
+
+                        <input
+                          type="checkbox"
+                          checked={task.completed}
+                          onChange={() => toggleComplete(task)}
+                        />
+
+                        <div>
+
+                          <span className={`font-medium ${task.completed ? "line-through text-gray-400" : "dark:text-white"}`}>
+                            {task.title}
                           </span>
-                        )}
 
-                        {status && (
-                          <span className={`font-semibold ${status.color}`}>
-                            {status.label}
-                          </span>
-                        )}
+                          <div className="text-sm flex gap-3 mt-1 items-center">
+
+                            <span className={getPriorityStyle(task.priority)}>
+                              {formatPriority(task.priority)}
+                            </span>
+
+                            {task.startTime && task.endTime && (
+                              <span>
+                                ⏰ {formatTime(task.startTime)} → {formatTime(task.endTime)}
+                              </span>
+                            )}
+
+                            {status && (
+                              <span className={`font-semibold ${status.color}`}>
+                                {status.label}
+                              </span>
+                            )}
+
+                          </div>
+
+                        </div>
+
+                      </div>
+
+                      <div className="flex gap-3">
+
+                        <button
+                          onClick={() => startEdit(task)}
+                          className="text-blue-600"
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          onClick={() => deleteTask(task._id)}
+                          className="text-red-600"
+                        >
+                          Delete
+                        </button>
 
                       </div>
 
                     </div>
 
-                  </div>
-
-                  <div className="flex gap-3">
-
-                    <button
-                      onClick={() => startEdit(task)}
-                      className="text-blue-600"
-                    >
-                      Edit
-                    </button>
-
-                    <button
-                      onClick={() => deleteTask(task._id)}
-                      className="text-red-600"
-                    >
-                      Delete
-                    </button>
-
-                  </div>
+                  )}
 
                 </motion.div>
 
