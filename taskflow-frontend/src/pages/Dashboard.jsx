@@ -65,7 +65,12 @@ function Dashboard() {
 
       const res = await API.post(
         "/tasks",
-        { title, priority, startTime, endTime },
+        {
+  title,
+  priority,
+  startTime: startTime?.toISOString(),
+  endTime: endTime?.toISOString()
+},
         { headers: { Authorization: `Bearer ${token}` } }
       )
 
@@ -154,8 +159,8 @@ function Dashboard() {
       const updatedTask = {
         title: editingTask.title,
         priority: editingTask.priority,
-        startTime: editingTask.startTime,
-        endTime: editingTask.endTime
+        startTime: editingTask.startTime?.toISOString(),
+        endTime: editingTask.endTime?.toISOString()
       }
 
       const res = await API.put(
