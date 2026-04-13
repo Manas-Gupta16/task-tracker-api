@@ -109,6 +109,52 @@ function Dashboard() {
 
   }
 
+  const markAllCompleted = async () => {
+
+  try {
+
+    const token = localStorage.getItem("token")
+
+    const pendingTasks = tasks.filter(t => !t.completed)
+
+    if (pendingTasks.length === 0) {
+      toast("All tasks already completed")
+      return
+    }
+
+    const updated = await Promise.all(
+      pendingTasks.map(async (task) => {
+        const res = await API.put(
+          `/tasks/${task._id}`,
+          { completed: true },
+          { headers: { Authorization: `Bearer ${token}` } }
+        )
+        return res.data
+      })
+    )
+
+    // merge updated + old
+    const updatedIds = new Set(updated.map(t => t._id))
+
+    setTasks(prev =>
+      prev.map(t => updatedIds.has(t._id)
+        ? updated.find(u => u._id === t._id)
+        : t
+      )
+    )
+
+    // confetti once
+    setConfetti(true)
+    setTimeout(() => setConfetti(false), 2000)
+
+    toast.success(`${updated.length} tasks completed`)
+
+  } catch {
+    toast.error("Failed to update tasks")
+  }
+
+}
+
   const toggleComplete = async (task) => {
 
     try {
@@ -271,6 +317,10 @@ function Dashboard() {
           <StatCard title="Pending" value={pendingTasks} color="text-red-500" />
         </div>
 
+        <div className="mb-6">
+  
+</div>
+
         {/* Search */}
         <input
           type="text"
@@ -316,12 +366,24 @@ function Dashboard() {
               className="border p-3 rounded-lg w-full dark:bg-gray-700 dark:text-white"
             />
 
-            <button
-              onClick={addTask}
-              className="bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              Add Task
-            </button>
+            <div className="flex gap-2">
+
+  <button
+    onClick={addTask}
+    className="bg-blue-600 text-white px-4 rounded-lg hover:bg-blue-700"
+  >
+    Add Task
+  </button>
+
+  <button
+  onClick={markAllCompleted}
+  disabled={!tasks.some(t => !t.completed)}
+  className="bg-green-600 text-white px-4 rounded-lg hover:bg-green-700 disabled:opacity-50"
+>
+  Complete All
+</button>
+
+</div>
 
           </div>
         </div>
