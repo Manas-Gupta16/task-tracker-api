@@ -5,15 +5,16 @@ exports.createTask = async (req, res) => {
 
   try {
 
-    const { title, priority, startTime, endTime } = req.body
+    const { title, description, priority, startTime, endTime } = req.body
 
     const task = await Task.create({
-  user: req.user._id,
-  title,
-  priority,
-  startTime,
-  endTime
-})
+      user: req.user._id,
+      title,
+      description, // ✅ ADDED
+      priority,
+      startTime,
+      endTime
+    })
 
     res.status(201).json(task)
 
@@ -57,7 +58,7 @@ exports.updateTask = async (req, res) => {
 
     const updatedTask = await Task.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      req.body, // ✅ description automatically handled
       { new: true }
     )
 

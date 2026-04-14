@@ -15,6 +15,7 @@ function Dashboard() {
 
   const [tasks, setTasks] = useState([])
   const [title, setTitle] = useState("")
+  const [description, setDescription] = useState("") // ✅ NEW
   const [priority, setPriority] = useState("medium")
 
   const [startTime, setStartTime] = useState(null)
@@ -66,17 +67,19 @@ function Dashboard() {
       const res = await API.post(
         "/tasks",
         {
-  title,
-  priority,
-  startTime: startTime?.toISOString(),
-  endTime: endTime?.toISOString()
-},
+          title,
+          description, // ✅ NEW
+          priority,
+          startTime: startTime?.toISOString(),
+          endTime: endTime?.toISOString()
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       )
 
       setTasks(prev => [res.data, ...prev])
 
       setTitle("")
+      setDescription("") // ✅ NEW
       setPriority("medium")
       setStartTime(null)
       setEndTime(null)
@@ -108,52 +111,6 @@ function Dashboard() {
     }
 
   }
-
-  const markAllCompleted = async () => {
-
-  try {
-
-    const token = localStorage.getItem("token")
-
-    const pendingTasks = tasks.filter(t => !t.completed)
-
-    if (pendingTasks.length === 0) {
-      toast("All tasks already completed")
-      return
-    }
-
-    const updated = await Promise.all(
-      pendingTasks.map(async (task) => {
-        const res = await API.put(
-          `/tasks/${task._id}`,
-          { completed: true },
-          { headers: { Authorization: `Bearer ${token}` } }
-        )
-        return res.data
-      })
-    )
-
-    // merge updated + old
-    const updatedIds = new Set(updated.map(t => t._id))
-
-    setTasks(prev =>
-      prev.map(t => updatedIds.has(t._id)
-        ? updated.find(u => u._id === t._id)
-        : t
-      )
-    )
-
-    // confetti once
-    setConfetti(true)
-    setTimeout(() => setConfetti(false), 2000)
-
-    toast.success(`${updated.length} tasks completed`)
-
-  } catch {
-    toast.error("Failed to update tasks")
-  }
-
-}
 
   const toggleComplete = async (task) => {
 
@@ -189,6 +146,7 @@ function Dashboard() {
     setEditingTask({
       _id: task._id,
       title: task.title,
+      description: task.description || "", // ✅ NEW
       priority: task.priority,
       startTime: task.startTime ? new Date(task.startTime) : null,
       endTime: task.endTime ? new Date(task.endTime) : null
@@ -204,6 +162,7 @@ function Dashboard() {
 
       const updatedTask = {
         title: editingTask.title,
+        description: editingTask.description, // ✅ NEW
         priority: editingTask.priority,
         startTime: editingTask.startTime?.toISOString(),
         endTime: editingTask.endTime?.toISOString()
@@ -237,12 +196,10 @@ function Dashboard() {
   }
 
   const formatTime = (date) => {
-
     return new Date(date).toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit"
     })
-
   }
 
   const getTaskStatus = (task) => {
@@ -317,10 +274,6 @@ function Dashboard() {
           <StatCard title="Pending" value={pendingTasks} color="text-red-500" />
         </div>
 
-        <div className="mb-6">
-  
-</div>
-
         {/* Search */}
         <input
           type="text"
@@ -332,13 +285,22 @@ function Dashboard() {
 
         {/* Add Task */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow mb-8">
-          <div className="grid md:grid-cols-5 gap-4">
+          <div className="flex flex-wrap gap-4">
 
             <input
               type="text"
               placeholder="Enter task..."
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              className="border p-3 rounded-lg dark:bg-gray-700 dark:text-white"
+            />
+
+            {/* ✅ DESCRIPTION INPUT */}
+            <input
+              type="text"
+              placeholder="Description..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               className="border p-3 rounded-lg dark:bg-gray-700 dark:text-white"
             />
 
@@ -366,24 +328,19 @@ function Dashboard() {
               className="border p-3 rounded-lg w-full dark:bg-gray-700 dark:text-white"
             />
 
-            <div className="flex gap-2">
-
-  <button
-    onClick={addTask}
-    className="bg-blue-600 text-white px-4 rounded-lg hover:bg-blue-700"
-  >
-    Add Task
-  </button>
-
-  <button
+            <button
+              onClick={addTask}
+              className="bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              
+              Add Task
+            </button>
+            <button
   onClick={markAllCompleted}
-  disabled={!tasks.some(t => !t.completed)}
-  className="bg-green-600 text-white px-4 rounded-lg hover:bg-green-700 disabled:opacity-50"
+  className="bg-green-600 text-white rounded-lg hover:bg-green-700 px-4"
 >
   Complete All
 </button>
-
-</div>
 
           </div>
         </div>
@@ -418,6 +375,15 @@ function Dashboard() {
                           setEditingTask({ ...editingTask, title: e.target.value })
                         }
                         className="border p-2 rounded"
+                      />
+
+                      <input
+                        value={editingTask.description}
+                        onChange={(e) =>
+                          setEditingTask({ ...editingTask, description: e.target.value })
+                        }
+                        className="border p-2 rounded"
+                        placeholder="Description"
                       />
 
                       <select
@@ -483,6 +449,13 @@ function Dashboard() {
                           <span className={`font-medium ${task.completed ? "line-through text-gray-400" : "dark:text-white"}`}>
                             {task.title}
                           </span>
+
+                          {/* ✅ DESCRIPTION DISPLAY */}
+                          {task.description && (
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              {task.description}
+                            </p>
+                          )}
 
                           <div className="text-sm flex gap-3 mt-1 items-center">
 
@@ -563,6 +536,37 @@ function StatCard({ title, value, color }) {
     </div>
 
   )
+
+}
+
+const markAllCompleted = async () => {
+
+  try {
+
+    const token = localStorage.getItem("token")
+
+    const updatedTasks = await Promise.all(
+      tasks.map(async (task) => {
+
+        if (task.completed) return task
+
+        const res = await API.put(
+          `/tasks/${task._id}`,
+          { completed: true },
+          { headers: { Authorization: `Bearer ${token}` } }
+        )
+
+        return res.data
+      })
+    )
+
+    setTasks(updatedTasks)
+
+    toast.success("All tasks completed 🎉")
+
+  } catch {
+    toast.error("Failed to update tasks")
+  }
 
 }
 
