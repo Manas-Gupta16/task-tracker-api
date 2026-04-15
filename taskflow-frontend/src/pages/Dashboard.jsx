@@ -235,6 +235,44 @@ function Dashboard() {
     return p.charAt(0).toUpperCase() + p.slice(1)
   }
 
+  const markAllCompleted = async () => {
+
+  try {
+
+    const token = localStorage.getItem("token")
+
+    const incompleteTasks = tasks.filter(t => !t.completed)
+
+    if (incompleteTasks.length === 0) {
+      toast("All tasks already completed")
+      return
+    }
+
+    const updated = await Promise.all(
+      incompleteTasks.map(task =>
+        API.put(
+          `/tasks/${task._id}`,
+          { completed: true },
+          { headers: { Authorization: `Bearer ${token}` } }
+        )
+      )
+    )
+
+    setTasks(prev =>
+      prev.map(task => ({
+        ...task,
+        completed: true
+      }))
+    )
+
+    toast.success("All tasks completed 🚀")
+
+  } catch {
+    toast.error("Failed to update tasks")
+  }
+
+}
+
   const filteredTasks = tasks.filter(task => {
 
     const matchesFilter =
@@ -539,35 +577,6 @@ function StatCard({ title, value, color }) {
 
 }
 
-const markAllCompleted = async () => {
 
-  try {
-
-    const token = localStorage.getItem("token")
-
-    const updatedTasks = await Promise.all(
-      tasks.map(async (task) => {
-
-        if (task.completed) return task
-
-        const res = await API.put(
-          `/tasks/${task._id}`,
-          { completed: true },
-          { headers: { Authorization: `Bearer ${token}` } }
-        )
-
-        return res.data
-      })
-    )
-
-    setTasks(updatedTasks)
-
-    toast.success("All tasks completed 🎉")
-
-  } catch {
-    toast.error("Failed to update tasks")
-  }
-
-}
 
 export default Dashboard
