@@ -13,7 +13,7 @@ const taskSchema = new mongoose.Schema(
     required: true
   },
 
-  description: { // ✅ ADDED
+  description: {   // ✅ NEW FIELD
     type: String,
     default: ""
   },

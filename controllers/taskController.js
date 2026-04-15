@@ -1,8 +1,7 @@
 const Task = require("../models/Task")
 
-// CREATE TASK
+// ✅ CREATE TASK
 exports.createTask = async (req, res) => {
-
   try {
 
     const { title, description, priority, startTime, endTime } = req.body
@@ -10,7 +9,7 @@ exports.createTask = async (req, res) => {
     const task = await Task.create({
       user: req.user._id,
       title,
-      description, // ✅ ADDED
+      description, // ✅ IMPORTANT
       priority,
       startTime,
       endTime
@@ -21,29 +20,26 @@ exports.createTask = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Server error" })
   }
-
 }
 
 
-// GET TASKS
+// ✅ GET TASKS
 exports.getTasks = async (req, res) => {
-
   try {
 
-    const tasks = await Task.find({ user: req.user._id }).sort({ createdAt: -1 })
+    const tasks = await Task.find({ user: req.user._id })
+      .sort({ createdAt: -1 })
 
     res.json(tasks)
 
   } catch (error) {
     res.status(500).json({ message: "Server error" })
   }
-
 }
 
 
-// UPDATE TASK
+// ✅ UPDATE TASK
 exports.updateTask = async (req, res) => {
-
   try {
 
     const task = await Task.findById(req.params.id)
@@ -58,7 +54,7 @@ exports.updateTask = async (req, res) => {
 
     const updatedTask = await Task.findByIdAndUpdate(
       req.params.id,
-      req.body, // ✅ description automatically handled
+      req.body, // ✅ handles description automatically
       { new: true }
     )
 
@@ -67,13 +63,11 @@ exports.updateTask = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Server error" })
   }
-
 }
 
 
-// DELETE TASK
+// ✅ DELETE TASK
 exports.deleteTask = async (req, res) => {
-
   try {
 
     const task = await Task.findById(req.params.id)
@@ -93,5 +87,4 @@ exports.deleteTask = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Server error" })
   }
-
 }
