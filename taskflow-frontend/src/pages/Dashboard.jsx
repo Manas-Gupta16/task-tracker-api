@@ -27,6 +27,7 @@ function Dashboard() {
   const [search, setSearch] = useState("")
 
   const [confetti, setConfetti] = useState(false)
+  const [bulkLoading, setBulkLoading] = useState(false)
 
   const navigate = useNavigate()
 
@@ -238,6 +239,7 @@ function Dashboard() {
   const markAllCompleted = async () => {
 
   try {
+    setBulkLoading(true)
 
     const token = localStorage.getItem("token")
 
@@ -245,10 +247,11 @@ function Dashboard() {
 
     if (incompleteTasks.length === 0) {
       toast("All tasks already completed")
+      setBulkLoading(false)
       return
     }
 
-    const updated = await Promise.all(
+    const updatedResponses = await Promise.all(
       incompleteTasks.map(task =>
         API.put(
           `/tasks/${task._id}`,
@@ -258,20 +261,30 @@ function Dashboard() {
       )
     )
 
-    setTasks(prev =>
-      prev.map(task => ({
-        ...task,
-        completed: true
-      }))
+    const updatedTasksMap = new Map(
+      updatedResponses.map(res => [res.data._id, res.data])
     )
+
+    setTasks(prev =>
+      prev.map(task =>
+        updatedTasksMap.get(task._id) || task
+      )
+    )
+
+    setConfetti(true)
+    setTimeout(() => setConfetti(false), 2000)
 
     toast.success("All tasks completed 🚀")
 
   } catch {
     toast.error("Failed to update tasks")
+  } finally {
+    setBulkLoading(false)
   }
 
 }
+
+ 
 
   const filteredTasks = tasks.filter(task => {
 
@@ -323,7 +336,7 @@ function Dashboard() {
 
         {/* Add Task */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow mb-8">
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap items-center gap-4">
 
             <input
               type="text"
@@ -367,17 +380,21 @@ function Dashboard() {
             />
 
             <button
-              onClick={addTask}
-              className="bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              
-              Add Task
-            </button>
+  onClick={addTask}
+  className="px-5 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium whitespace-nowrap"
+>
+  Add Task
+</button>
             <button
   onClick={markAllCompleted}
-  className="bg-green-600 text-white rounded-lg hover:bg-green-700 px-4"
+  disabled={bulkLoading || tasks.every(t => t.completed)}
+  className={`px-5 py-3 rounded-lg text-white transition font-medium whitespace-nowrap
+    ${bulkLoading || tasks.every(t => t.completed)
+      ? "bg-gray-400 cursor-not-allowed"
+      : "bg-green-600 hover:bg-green-700"}
+  `}
 >
-  Complete All
+  {bulkLoading ? "Completing..." : "Complete All"}
 </button>
 
           </div>
@@ -487,6 +504,7 @@ function Dashboard() {
                           <span className={`font-medium ${task.completed ? "line-through text-gray-400" : "dark:text-white"}`}>
                             {task.title}
                           </span>
+          
 
                           {/* ✅ DESCRIPTION DISPLAY */}
                           {task.description && (
