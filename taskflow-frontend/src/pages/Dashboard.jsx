@@ -16,6 +16,8 @@ function Dashboard() {
   const [tasks, setTasks] = useState([])
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("") // ✅ NEW
+  const [tags, setTags] = useState("")
+  const [activeTag, setActiveTag] = useState(null)
   const [priority, setPriority] = useState("medium")
 
   const [startTime, setStartTime] = useState(null)
@@ -68,19 +70,21 @@ function Dashboard() {
       const res = await API.post(
         "/tasks",
         {
-          title,
-          description, // ✅ NEW
-          priority,
-          startTime: startTime?.toISOString(),
-          endTime: endTime?.toISOString()
-        },
+  title,
+  description,
+  tags: tags.split(",").map(t => t.trim()).filter(Boolean),
+  priority,
+  startTime: startTime?.toISOString(),
+  endTime: endTime?.toISOString()
+},
         { headers: { Authorization: `Bearer ${token}` } }
       )
 
       setTasks(prev => [res.data, ...prev])
 
       setTitle("")
-      setDescription("") // ✅ NEW
+      setDescription("")
+      setTags("") // ✅ NEW
       setPriority("medium")
       setStartTime(null)
       setEndTime(null)
@@ -237,7 +241,6 @@ function Dashboard() {
   }
 
   const markAllCompleted = async () => {
-
   try {
     setBulkLoading(true)
 
@@ -247,7 +250,6 @@ function Dashboard() {
 
     if (incompleteTasks.length === 0) {
       toast("All tasks already completed")
-      setBulkLoading(false)
       return
     }
 
@@ -281,27 +283,32 @@ function Dashboard() {
   } finally {
     setBulkLoading(false)
   }
-
 }
 
  
 
   const filteredTasks = tasks.filter(task => {
 
-    const matchesFilter =
-      filter === "completed"
-        ? task.completed
-        : filter === "pending"
-        ? !task.completed
-        : true
+  const matchesFilter =
+    filter === "completed"
+      ? task.completed
+      : filter === "pending"
+      ? !task.completed
+      : true
 
-    const matchesSearch = task.title
-      .toLowerCase()
-      .includes(search.toLowerCase())
+  const matchesSearch =
+    task.title.toLowerCase().includes(search.toLowerCase()) ||
+    (task.tags &&
+      task.tags.some(tag =>
+        tag.toLowerCase().includes(search.toLowerCase())
+      ))
 
-    return matchesFilter && matchesSearch
+  const matchesTag =
+    !activeTag ||
+    (task.tags && task.tags.includes(activeTag))
 
-  })
+  return matchesFilter && matchesSearch && matchesTag
+})
 
   return (
 
@@ -336,69 +343,92 @@ function Dashboard() {
 
         {/* Add Task */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow mb-8">
-          <div className="flex flex-wrap items-center gap-4">
 
-            <input
-              type="text"
-              placeholder="Enter task..."
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="border p-3 rounded-lg dark:bg-gray-700 dark:text-white"
-            />
+  {/* INPUT ROW */}
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-5">
 
-            {/* ✅ DESCRIPTION INPUT */}
-            <input
-              type="text"
-              placeholder="Description..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="border p-3 rounded-lg dark:bg-gray-700 dark:text-white"
-            />
+    <input
+      type="text"
+      placeholder="Enter task..."
+      value={title}
+      onChange={(e) => setTitle(e.target.value)}
+      className="border p-3 rounded-lg dark:bg-gray-700 dark:text-white w-full"
+    />
 
-            <select
-              value={priority}
-              onChange={(e) => setPriority(e.target.value)}
-              className="border p-3 rounded-lg dark:bg-gray-700 dark:text-white"
-            >
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-            </select>
+    <input
+      type="text"
+      placeholder="Description..."
+      value={description}
+      onChange={(e) => setDescription(e.target.value)}
+      className="border p-3 rounded-lg dark:bg-gray-700 dark:text-white w-full"
+    />
 
-            <DatePicker
-              selected={startTime}
-              onChange={(date) => setStartTime(date)}
-              showTimeSelect
-              className="border p-3 rounded-lg w-full dark:bg-gray-700 dark:text-white"
-            />
+    <input
+  type="text"
+  placeholder="Tags (comma separated)"
+  value={tags}
+  onChange={(e) => setTags(e.target.value)}
+  className="border p-3 rounded-lg dark:bg-gray-700 dark:text-white w-full"
+/>
 
-            <DatePicker
-              selected={endTime}
-              onChange={(date) => setEndTime(date)}
-              showTimeSelect
-              className="border p-3 rounded-lg w-full dark:bg-gray-700 dark:text-white"
-            />
+    <select
+      value={priority}
+      onChange={(e) => setPriority(e.target.value)}
+      className="border p-3 rounded-lg dark:bg-gray-700 dark:text-white w-full"
+    >
+      <option value="low">Low</option>
+      <option value="medium">Medium</option>
+      <option value="high">High</option>
+    </select>
 
-            <button
-  onClick={addTask}
-  className="px-5 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium whitespace-nowrap"
->
-  Add Task
-</button>
-            <button
-  onClick={markAllCompleted}
-  disabled={bulkLoading || tasks.every(t => t.completed)}
-  className={`px-5 py-3 rounded-lg text-white transition font-medium whitespace-nowrap
-    ${bulkLoading || tasks.every(t => t.completed)
-      ? "bg-gray-400 cursor-not-allowed"
-      : "bg-green-600 hover:bg-green-700"}
-  `}
->
-  {bulkLoading ? "Completing..." : "Complete All"}
-</button>
+  </div>
 
-          </div>
-        </div>
+  {/* DATE ROW */}
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+
+    <DatePicker
+      selected={startTime}
+      onChange={(date) => setStartTime(date)}
+      showTimeSelect
+      placeholderText="Start Time"
+      className="border p-3 rounded-lg w-full dark:bg-gray-700 dark:text-white"
+    />
+
+    <DatePicker
+      selected={endTime}
+      onChange={(date) => setEndTime(date)}
+      showTimeSelect
+      placeholderText="End Time"
+      className="border p-3 rounded-lg w-full dark:bg-gray-700 dark:text-white"
+    />
+
+  </div>
+
+  {/* BUTTON ROW */}
+  <div className="flex justify-end gap-4 mt-2">
+
+    <button
+      onClick={addTask}
+      className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium shadow-md"
+    >
+      Add Task
+    </button>
+
+    <button
+      onClick={markAllCompleted}
+      disabled={bulkLoading || tasks.every(t => t.completed)}
+      className={`px-6 py-3 rounded-lg text-white transition font-medium shadow-md
+        ${bulkLoading || tasks.every(t => t.completed)
+          ? "bg-gray-400 cursor-not-allowed"
+          : "bg-green-600 hover:bg-green-700"}
+      `}
+    >
+      {bulkLoading ? "Completing..." : "Complete All"}
+    </button>
+          
+  </div>
+
+</div>
 
         {/* Tasks */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
@@ -440,6 +470,8 @@ function Dashboard() {
                         className="border p-2 rounded"
                         placeholder="Description"
                       />
+
+                      
 
                       <select
                         value={editingTask.priority}
@@ -512,6 +544,28 @@ function Dashboard() {
                               {task.description}
                             </p>
                           )}
+
+                          {task.tags && task.tags.length > 0 && (
+  <div className="flex gap-2 mt-2 flex-wrap">
+    {task.tags.map((tag, index) => (
+      <span
+  key={index}
+  onClick={() => setActiveTag(tag)}
+  className={`cursor-pointer px-2 py-1 rounded-full text-xs font-medium transition
+    ${activeTag === tag
+      ? "bg-blue-600 text-white"
+      : "bg-blue-100 text-blue-600 hover:bg-blue-200"}
+  `}
+>
+  #{tag}
+</span>
+    ))}
+  </div>
+)}
+
+                          
+
+                          
 
                           <div className="text-sm flex gap-3 mt-1 items-center">
 

@@ -4,12 +4,13 @@ const Task = require("../models/Task")
 exports.createTask = async (req, res) => {
   try {
 
-    const { title, description, priority, startTime, endTime } = req.body
+    const { title, description, tags, priority, startTime, endTime } = req.body
 
     const task = await Task.create({
       user: req.user._id,
       title,
-      description, // ✅ IMPORTANT
+      description,
+      tags: tags || [], // ✅ NEW (safe fallback)
       priority,
       startTime,
       endTime
@@ -54,7 +55,10 @@ exports.updateTask = async (req, res) => {
 
     const updatedTask = await Task.findByIdAndUpdate(
       req.params.id,
-      req.body, // ✅ handles description automatically
+      {
+        ...req.body,
+        tags: req.body.tags ?? task.tags // ✅ keep old tags if not sent
+      },
       { new: true }
     )
 
