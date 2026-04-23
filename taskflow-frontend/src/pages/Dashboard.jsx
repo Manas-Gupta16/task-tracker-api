@@ -19,10 +19,8 @@ function Dashboard() {
   const [tags, setTags] = useState("")
   const [activeTag, setActiveTag] = useState(null)
   const [priority, setPriority] = useState("medium")
-
   const [startTime, setStartTime] = useState(null)
   const [endTime, setEndTime] = useState(null)
-
   const [editingTask, setEditingTask] = useState(null)
 
   const [filter, setFilter] = useState("all")
@@ -72,7 +70,12 @@ function Dashboard() {
         {
   title,
   description,
-  tags: tags.split(",").map(t => t.trim()).filter(Boolean),
+  tags: [...new Set(
+  tags
+    .split(",")
+    .map(t => t.trim().toLowerCase())
+    .filter(Boolean)
+)]  ,
   priority,
   startTime: startTime?.toISOString(),
   endTime: endTime?.toISOString()
@@ -287,7 +290,7 @@ function Dashboard() {
 
  
 
-  const filteredTasks = tasks.filter(task => {
+ const filteredTasks = tasks.filter(task => {
 
   const matchesFilter =
     filter === "completed"
@@ -363,13 +366,22 @@ function Dashboard() {
       className="border p-3 rounded-lg dark:bg-gray-700 dark:text-white w-full"
     />
 
-    <input
-  type="text"
-  placeholder="Tags (comma separated)"
-  value={tags}
-  onChange={(e) => setTags(e.target.value)}
-  className="border p-3 rounded-lg dark:bg-gray-700 dark:text-white w-full"
-/>
+   <div className="flex flex-col w-full">
+  <input
+    type="text"
+    placeholder="e.g. study, dsa, exam"
+    value={tags}
+    onChange={(e) => setTags(e.target.value)}
+    onKeyDown={(e) => {
+      if (e.key === "Enter") addTask()
+    }}
+    className="border p-3 rounded-lg dark:bg-gray-700 dark:text-white w-full"
+  />
+
+  <p className="text-xs text-gray-400 mt-1 italic">
+    Separate tags using commas
+  </p>
+</div>
 
     <select
       value={priority}
@@ -429,6 +441,22 @@ function Dashboard() {
   </div>
 
 </div>
+
+
+      {activeTag && (
+  <div className="mb-4 flex items-center gap-3">
+    <span className="text-sm dark:text-white">
+      Filtering by: <b>#{activeTag}</b>
+    </span>
+
+    <button
+      onClick={() => setActiveTag(null)}
+      className="text-red-500 text-sm hover:underline"
+    >
+      Clear
+    </button>
+  </div>
+)}
 
         {/* Tasks */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
@@ -549,16 +577,18 @@ function Dashboard() {
   <div className="flex gap-2 mt-2 flex-wrap">
     {task.tags.map((tag, index) => (
       <span
-  key={index}
-  onClick={() => setActiveTag(tag)}
-  className={`cursor-pointer px-2 py-1 rounded-full text-xs font-medium transition
-    ${activeTag === tag
-      ? "bg-blue-600 text-white"
-      : "bg-blue-100 text-blue-600 hover:bg-blue-200"}
-  `}
->
-  #{tag}
-</span>
+    key={index}
+    onClick={() => setActiveTag(tag)}
+    className={`cursor-pointer px-2 py-1 rounded-full text-xs font-medium text-white transition
+      ${
+        activeTag === tag
+          ? "bg-blue-700 scale-105"
+          : ["bg-blue-500","bg-purple-500","bg-green-500","bg-pink-500","bg-indigo-500"][index % 5]
+      }
+    `}
+  >
+    #{tag}
+  </span>
     ))}
   </div>
 )}
