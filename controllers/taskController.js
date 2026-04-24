@@ -7,14 +7,14 @@ exports.createTask = async (req, res) => {
     const { title, description, tags, priority, startTime, endTime } = req.body
 
     const task = await Task.create({
-      user: req.user._id,
-      title,
-      description,
-      tags: tags || [], // ✅ NEW (safe fallback)
-      priority,
-      startTime,
-      endTime
-    })
+  user: req.user._id,
+  title,
+  description,
+  tags,
+  priority,
+  startTime,
+  endTime
+})
 
     res.status(201).json(task)
 
