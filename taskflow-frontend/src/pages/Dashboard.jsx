@@ -299,29 +299,34 @@
 
   
 
-  const filteredTasks = tasks.filter(task => {
 
-    const matchesFilter =
-      filter === "completed"
-        ? task.completed
-        : filter === "pending"
-        ? !task.completed
-        : true
+const allTags = [...new Set(
+  tasks.flatMap(task => task.tags || [])
+)]
 
-    const matchesSearch =
-      task.title.toLowerCase().includes(search.toLowerCase()) ||
-      (task.tags || []).some(tag =>
-    tag.toLowerCase().includes(search.toLowerCase())
-  )
+const filteredTasks = tasks.filter(task => {
 
-    const matchesTag =
-  !activeTag ||
-  (task.tags || []).some(tag =>
-    tag.toLowerCase() === activeTag.toLowerCase()
-  )
+  const matchesFilter =
+    filter === "completed"
+      ? task.completed
+      : filter === "pending"
+      ? !task.completed
+      : true
 
-    return matchesFilter && matchesSearch && matchesTag
-  })
+  const matchesSearch =
+    task.title.toLowerCase().includes(search.toLowerCase()) ||
+    (task.tags || []).some(tag =>
+      tag.toLowerCase().includes(search.toLowerCase())
+    )
+
+  const matchesTag =
+    !activeTag ||
+    (task.tags || []).some(tag =>
+      tag.toLowerCase() === activeTag.toLowerCase()
+    )
+
+  return matchesFilter && matchesSearch && matchesTag
+})
 
     return (
 
@@ -329,7 +334,14 @@
 
         {confetti && <Confetti />}
 
-        <Sidebar setFilter={setFilter} logout={logout} />
+        <Sidebar 
+  setFilter={setFilter} 
+  logout={logout}
+  allTags={allTags}
+  activeTag={activeTag}
+  setActiveTag={setActiveTag}
+  tasks={tasks}   
+/>
         <DarkModeToggle />
 
         <div className="flex-1 p-10">
