@@ -3,18 +3,17 @@ const Task = require("../models/Task")
 // ✅ CREATE TASK
 exports.createTask = async (req, res) => {
   try {
-
     const { title, description, tags, priority, startTime, endTime } = req.body
 
     const task = await Task.create({
-  user: req.user._id,
-  title,
-  description,
-  tags,
-  priority,
-  startTime,
-  endTime
-})
+      user: req.user._id,
+      title,
+      description,
+      tags,
+      priority,
+      startTime,
+      endTime
+    })
 
     res.status(201).json(task)
 
@@ -27,7 +26,6 @@ exports.createTask = async (req, res) => {
 // ✅ GET TASKS
 exports.getTasks = async (req, res) => {
   try {
-
     const tasks = await Task.find({ user: req.user._id })
       .sort({ createdAt: -1 })
 
@@ -42,7 +40,6 @@ exports.getTasks = async (req, res) => {
 // ✅ UPDATE TASK
 exports.updateTask = async (req, res) => {
   try {
-
     const task = await Task.findById(req.params.id)
 
     if (!task) {
@@ -57,7 +54,7 @@ exports.updateTask = async (req, res) => {
       req.params.id,
       {
         ...req.body,
-        tags: req.body.tags ?? task.tags // ✅ keep old tags if not sent
+        tags: req.body.tags ?? task.tags // keep old tags if not sent
       },
       { new: true }
     )
@@ -73,7 +70,6 @@ exports.updateTask = async (req, res) => {
 // ✅ DELETE TASK
 exports.deleteTask = async (req, res) => {
   try {
-
     const task = await Task.findById(req.params.id)
 
     if (!task) {
@@ -92,3 +88,42 @@ exports.deleteTask = async (req, res) => {
     res.status(500).json({ message: "Server error" })
   }
 }
+
+
+// ✅ GET TASK STATS (Optimized)
+exports.getTaskStats = async (req, res) => {
+  try {
+    const userId = req.user._id
+
+    const total = await Task.countDocuments({ user: userId })
+
+    const completed = await Task.countDocuments({
+      user: userId,
+      completed: true
+    })
+
+    const pending = total - completed
+
+    const highPriority = await Task.countDocuments({
+      user: userId,
+      priority: "high"
+    })
+
+    const overdue = await Task.countDocuments({
+      user: userId,
+      endTime: { $lt: new Date() },
+      completed: false
+    })
+
+    res.json({
+      total,
+      completed,
+      pending,
+      highPriority,
+      overdue
+    })
+
+  } catch (error) {
+    res.status(500).json({ message: "Server error" })
+  }
+} 
