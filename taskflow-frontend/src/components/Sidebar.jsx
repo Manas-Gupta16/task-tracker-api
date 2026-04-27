@@ -1,12 +1,19 @@
 import { LayoutDashboard, CheckCircle, Clock, ListTodo, LogOut } from "lucide-react"
 
-function Sidebar({ setFilter, logout, allTags, activeTag, setActiveTag, tasks }) {
+function Sidebar({
+  setFilter,
+  logout,
+  allTags = [],
+  activeTag,
+  setActiveTag,
+  tasks = []   // ✅ default value prevents crash
+}) {
 
+  // ✅ Safe tag count
   const tasksCount = (tag) =>
-    tasks.filter(t => (t.tags || []).includes(tag)).length
+    tasks?.filter(t => (t.tags || []).includes(tag)).length || 0
 
   return (
-
     <div className="w-64 bg-gradient-to-b from-indigo-600 to-blue-600 dark:from-gray-800 dark:to-gray-900 text-white min-h-screen p-6 flex flex-col">
 
       {/* Logo */}
@@ -23,7 +30,7 @@ function Sidebar({ setFilter, logout, allTags, activeTag, setActiveTag, tasks })
             setFilter("all")
             setActiveTag(null)
           }}
-          className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-white/20"
+          className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-white/20 transition"
         >
           <LayoutDashboard size={18} />
           Dashboard
@@ -34,7 +41,7 @@ function Sidebar({ setFilter, logout, allTags, activeTag, setActiveTag, tasks })
             setFilter("completed")
             setActiveTag(null)
           }}
-          className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-white/20"
+          className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-white/20 transition"
         >
           <CheckCircle size={18} />
           Completed Tasks
@@ -45,7 +52,7 @@ function Sidebar({ setFilter, logout, allTags, activeTag, setActiveTag, tasks })
             setFilter("pending")
             setActiveTag(null)
           }}
-          className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-white/20"
+          className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-white/20 transition"
         >
           <Clock size={18} />
           Pending Tasks
@@ -56,7 +63,7 @@ function Sidebar({ setFilter, logout, allTags, activeTag, setActiveTag, tasks })
             setFilter("all")
             setActiveTag(null)
           }}
-          className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-white/20"
+          className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-white/20 transition"
         >
           <ListTodo size={18} />
           All Tasks
@@ -91,6 +98,8 @@ function Sidebar({ setFilter, logout, allTags, activeTag, setActiveTag, tasks })
               `}
             >
               <span>#{tag}</span>
+
+              {/* ✅ Safe count display */}
               <span className="text-xs opacity-70">
                 {tasksCount(tag)}
               </span>
@@ -103,14 +112,13 @@ function Sidebar({ setFilter, logout, allTags, activeTag, setActiveTag, tasks })
       {/* Logout */}
       <button
         onClick={logout}
-        className="mt-auto flex items-center gap-3 p-3 bg-red-500 rounded-lg hover:bg-red-600"
+        className="mt-auto flex items-center gap-3 p-3 bg-red-500 rounded-lg hover:bg-red-600 transition"
       >
         <LogOut size={18} />
         Logout
       </button>
 
     </div>
-
   )
 }
 
