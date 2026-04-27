@@ -31,13 +31,18 @@
 
     const navigate = useNavigate()
 
-    const totalTasks = tasks.length
-    const completedTasks = tasks.filter(t => t.completed).length
-    const pendingTasks = totalTasks - completedTasks
+    const [stats, setStats] = useState({
+  total: 0,
+  completed: 0,
+  pending: 0,
+  highPriority: 0,
+  overdue: 0
+})
 
     useEffect(() => {
-      fetchTasks()
-    }, [])
+  fetchTasks()
+  fetchStats()
+}, [])
 
     const fetchTasks = async () => {
       try {
@@ -84,6 +89,7 @@
         )
 
         setTasks(prev => [res.data, ...prev])
+        fetchStats()
 
         setTitle("")
         setDescription("")
@@ -112,6 +118,7 @@
         })
 
         setTasks(prev => prev.filter(t => t._id !== id))
+        fetchStats()  
 
         toast.success("Task deleted")
 
@@ -120,6 +127,21 @@
       }
 
     }
+
+    const fetchStats = async () => {
+  try {
+    const token = localStorage.getItem("token")
+
+    const res = await API.get("/tasks/stats", {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+
+    setStats(res.data)
+
+  } catch {
+    toast.error("Failed to fetch stats")
+  }
+}
 
     const toggleComplete = async (task) => {
 
@@ -138,6 +160,8 @@
             t._id === task._id ? res.data : t
           )
         )
+
+        fetchStats()
 
         if (!task.completed) {
           setConfetti(true)
@@ -197,6 +221,7 @@
         )
 
         setEditingTask(null)
+        fetchStats()
 
         toast.success("Task updated")
 
@@ -285,6 +310,8 @@
         )
       )
 
+      fetchStats()
+
       setConfetti(true)
       setTimeout(() => setConfetti(false), 2000)
 
@@ -339,8 +366,7 @@ const filteredTasks = tasks.filter(task => {
   logout={logout}
   allTags={allTags}
   activeTag={activeTag}
-  setActiveTag={setActiveTag}
-  tasks={tasks}   
+  setActiveTag={setActiveTag} 
 />
         <DarkModeToggle />
 
@@ -351,11 +377,13 @@ const filteredTasks = tasks.filter(task => {
           </h1>
 
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-6 mb-8">
-            <StatCard title="Total Tasks" value={totalTasks} />
-            <StatCard title="Completed" value={completedTasks} color="text-green-600" />
-            <StatCard title="Pending" value={pendingTasks} color="text-red-500" />
-          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
+  <StatCard title="Total Tasks" value={stats.total} />
+  <StatCard title="Completed" value={stats.completed} color="text-green-600" />
+  <StatCard title="Pending" value={stats.pending} color="text-red-500" />
+  <StatCard title="High Priority" value={stats.highPriority} color="text-orange-500" />
+  <StatCard title="Overdue" value={stats.overdue} color="text-red-600" />
+</div>  
 
           {/* Search */}
           <input
