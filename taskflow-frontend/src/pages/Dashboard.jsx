@@ -101,9 +101,10 @@
 
         toast.success("Task added")
 
-      } catch {
-        toast.error("Error adding task")
-      }
+      } catch (err) {
+  console.error(err)
+  toast.error("Error adding task")
+}
 
     }
 
@@ -122,9 +123,10 @@
 
         toast.success("Task deleted")
 
-      } catch {
-        toast.error("Error deleting task")
-      }
+      } catch (err) {
+  console.error(err)
+  toast.error("Error deleting task")
+}
 
     }
 
@@ -138,9 +140,10 @@
 
     setStats(res.data)
 
-  } catch {
-    toast.error("Failed to fetch stats")
-  }
+  } catch (err) {
+  console.error(err)
+  toast.error("Failed to fetch tasks")
+}
 }
 
     const toggleComplete = async (task) => {
@@ -168,9 +171,10 @@
           setTimeout(() => setConfetti(false), 2000)
         }
 
-      } catch {
-        toast.error("Error updating task")
-      }
+      } catch (err) {
+  console.error(err)
+  toast.error("Error updating task")
+}
 
     }
 
@@ -225,9 +229,10 @@
 
         toast.success("Task updated")
 
-      } catch {
-        toast.error("Update failed")
-      }
+      } catch (err) {
+  console.error(err)
+  toast.error("Update failed")
+}
 
     }
 
@@ -317,9 +322,10 @@
 
       toast.success("All tasks completed 🚀")
 
-    } catch {
-      toast.error("Failed to update tasks")
-    } finally {
+    } catch (err) {
+  console.error(err)
+  toast.error("Failed to update tasks")
+} finally {
       setBulkLoading(false)
     }
   }
@@ -366,7 +372,8 @@ const filteredTasks = tasks.filter(task => {
   logout={logout}
   allTags={allTags}
   activeTag={activeTag}
-  setActiveTag={setActiveTag} 
+  setActiveTag={setActiveTag}
+  tasks={tasks} 
 />
         <DarkModeToggle />
 
