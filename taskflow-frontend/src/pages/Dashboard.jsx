@@ -29,6 +29,8 @@
     const [confetti, setConfetti] = useState(false)
     const [bulkLoading, setBulkLoading] = useState(false)
 
+    const [now, setNow] = useState(Date.now())
+
     const navigate = useNavigate()
 
     const [stats, setStats] = useState({
@@ -42,6 +44,14 @@
     useEffect(() => {
   fetchTasks()
   fetchStats()
+}, [])
+
+useEffect(() => {
+  const interval = setInterval(() => {
+    setNow(Date.now())
+  }, 60000) // update every 1 min
+
+  return () => clearInterval(interval)
 }, [])
 
     const fetchTasks = async () => {
@@ -250,20 +260,45 @@
 
     const getTaskStatus = (task) => {
 
-      if (!task.startTime || !task.endTime) return null
+  if (!task.startTime || !task.endTime) return null
 
-      const now = new Date().getTime()
-      const start = new Date(task.startTime).getTime()
-      const end = new Date(task.endTime).getTime()
+  const currentTime = now
+  const start = new Date(task.startTime).getTime()
+  const end = new Date(task.endTime).getTime()
 
-      if (now > end) return { label: "Overdue", color: "text-red-500" }
+  const diff = end - now // time remaining
 
-      if (now >= start && now <= end)
-        return { label: "Happening Now", color: "text-yellow-500" }
+  if (diff < 0) {
+  return { label: "Overdue", color: "text-red-500" }
+}
 
-      return { label: "Upcoming", color: "text-green-500" }
+if (now >= start && now <= end) {
+  return { label: "Happening Now", color: "text-blue-500" }
+}
 
-    }
+if (diff <= 60 * 60 * 1000) {
+  return { label: "Due Soon", color: "text-yellow-500" }
+}
+
+return { label: "Upcoming", color: "text-green-500" }
+}
+
+const getTimeRemaining = (endTime) => {
+  const end = new Date(endTime).getTime()
+  const diff = end - now
+
+
+  if (diff <= 0) return "Expired"
+
+  const minutes = Math.floor(diff / (1000 * 60))
+  const hours = Math.floor(minutes / 60)
+
+  if (hours > 0) {
+    return `${hours}h ${minutes % 60}m left`
+  }
+
+  return `${minutes}m left`
+}
 
     const getPriorityStyle = (priority) => {
 
@@ -324,7 +359,7 @@
 
     } catch (err) {
   console.error(err)
-  toast.error("Failed to update tasks")
+  toast.error("Failed to update stats")
 } finally {
       setBulkLoading(false)
     }
@@ -334,7 +369,7 @@
 
 
 const allTags = [...new Set(
-  tasks.flatMap(task => task.tags || [])
+  tasks?.flatMap(task => task.tags || []) || []
 )]
 
 const filteredTasks = tasks.filter(task => {
@@ -535,7 +570,15 @@ const filteredTasks = tasks.filter(task => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.2 }}
-                    className="border dark:border-gray-600 p-4 mb-3 rounded-lg"
+                    className={`border p-4 mb-3 rounded-lg dark:border-gray-600
+  ${
+    status?.label === "Overdue"
+      ? "border-red-500 bg-red-50 dark:bg-red-900/20"
+      : status?.label === "Due Soon"
+      ? "border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20"
+      : ""
+  }
+`}
                   >
 
                     {editingTask && editingTask._id === task._id ? (
@@ -681,10 +724,15 @@ const filteredTasks = tasks.filter(task => {
                               )}
 
                               {status && (
-                                <span className={`font-semibold ${status.color}`}>
-                                  {status.label}
-                                </span>
-                              )}
+  <span className={`font-semibold ${status.color}`}>
+    {status.label}
+    {task.endTime && status.label !== "Overdue" && (
+      <span className="ml-2 text-xs text-gray-400">
+        ⏳ {getTimeRemaining(task.endTime)}
+      </span>
+    )}
+  </span>
+)}
 
                             </div>
 
