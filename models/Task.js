@@ -19,9 +19,15 @@ const taskSchema = new mongoose.Schema(
   },
 
   tags: {
-  type: [String],
-  default: []
-},
+    type: [String],
+    default: []
+  },
+
+  category: {
+    type: String,
+    enum: ["work", "study", "personal"],
+    default: "personal"
+  },
 
   completed: {
     type: Boolean,

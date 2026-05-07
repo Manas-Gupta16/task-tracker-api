@@ -3,7 +3,7 @@ const Task = require("../models/Task")
 // ✅ CREATE TASK
 exports.createTask = async (req, res) => {
   try {
-    const { title, description, tags, priority, startTime, endTime } = req.body
+    const { title, description, tags, priority, startTime, endTime, category } = req.body
 
     const task = await Task.create({
       user: req.user._id,
@@ -12,7 +12,8 @@ exports.createTask = async (req, res) => {
       tags,
       priority,
       startTime,
-      endTime
+      endTime,
+      category
     })
 
     res.status(201).json(task)
