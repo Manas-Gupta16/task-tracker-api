@@ -25,6 +25,7 @@ function Dashboard() {
 
   const [filter, setFilter] = useState("all")
   const [search, setSearch] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState("")
 
   const [confetti, setConfetti] = useState(false)
   const [bulkLoading, setBulkLoading] = useState(false)
@@ -93,7 +94,15 @@ function Dashboard() {
       }
 
     })
-  }, [now, tasks, notifiedTasks]) // FIX #3
+  }, [now, tasks, notifiedTasks])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search)
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [search])
 
   const fetchTasks = async () => {
     try {
@@ -422,29 +431,31 @@ function Dashboard() {
     [tasks]
   )
 
-  const filteredTasks = tasks.filter(task => {
+  const filteredTasks = useMemo(() => {
+    return tasks.filter(task => {
 
-    const matchesFilter =
-      filter === "completed"
-        ? task.completed
-        : filter === "pending"
-          ? !task.completed
-          : true
+      const matchesFilter =
+        filter === "completed"
+          ? task.completed
+          : filter === "pending"
+            ? !task.completed
+            : true
 
-    const matchesSearch =
-      task.title.toLowerCase().includes(search.toLowerCase()) ||
-      (task.tags || []).some(tag =>
-        tag.toLowerCase().includes(search.toLowerCase())
-      )
+      const matchesSearch =
+        task.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        (task.tags || []).some(tag =>
+          tag.toLowerCase().includes(debouncedSearch.toLowerCase())
+        )
 
-    const matchesTag =
-      !activeTag ||
-      (task.tags || []).some(tag =>
-        tag.toLowerCase() === activeTag.toLowerCase()
-      )
+      const matchesTag =
+        !activeTag ||
+        (task.tags || []).some(tag =>
+          tag.toLowerCase() === activeTag.toLowerCase()
+        )
 
-    return matchesFilter && matchesSearch && matchesTag
-  })
+      return matchesFilter && matchesSearch && matchesTag
+    })
+  }, [tasks, filter, debouncedSearch, activeTag])
 
   return (
 
