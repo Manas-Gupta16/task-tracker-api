@@ -1,6 +1,7 @@
 function TaskView({
     task,
     status,
+    now,
     toggleComplete,
     activeTag,
     setActiveTag,
@@ -31,8 +32,8 @@ function TaskView({
 
                         <span
                             className={`font-medium ${task.completed
-                                ? "line-through text-gray-400"
-                                : "dark:text-white"
+                                    ? "line-through text-gray-400"
+                                    : "dark:text-white"
                                 }`}
                         >
                             {task.title}
@@ -98,7 +99,7 @@ function TaskView({
                                 {task.endTime &&
                                     status.label !== "Overdue" && (
                                         <span className="ml-2 text-xs text-gray-400">
-                                            ⏳ {getTimeRemaining(task.endTime)}
+                                            ⏳ {getTimeRemaining(task.endTime, now)}
                                         </span>
                                     )}
 

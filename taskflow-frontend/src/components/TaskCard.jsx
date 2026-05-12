@@ -5,6 +5,7 @@ import TaskView from "./TaskView"
 function TaskCard({
     task,
     status,
+    now,
     editingTask,
     setEditingTask,
     saveEdit,
@@ -51,6 +52,7 @@ function TaskCard({
                 <TaskView
                     task={task}
                     status={status}
+                    now={now}
                     toggleComplete={toggleComplete}
                     activeTag={activeTag}
                     setActiveTag={setActiveTag}
@@ -71,4 +73,4 @@ function TaskCard({
 
 }
 
-export default TaskCardgit
+export default TaskCard
