@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom"
 import { useEffect, useState, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Confetti from "react-confetti"
-import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 
 import API from "../services/api"
@@ -11,6 +10,7 @@ import toast from "react-hot-toast"
 import Sidebar from "../components/Sidebar"
 import DarkModeToggle from "../components/DarkModeToggle"
 import TaskCard from "../components/TaskCard"
+import AddTaskForm from "../components/AddTaskForm"
 
 import {
   formatTime,
@@ -444,117 +444,26 @@ function Dashboard() {
         />
 
         {/* Add Task */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow mb-8">
-
-          {/* INPUT ROW */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-5">
-
-            <input
-              type="text"
-              placeholder="Enter task..."
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="border p-3 rounded-lg dark:bg-gray-700 dark:text-white w-full"
-            />
-
-            <input
-              type="text"
-              placeholder="Description..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="border p-3 rounded-lg dark:bg-gray-700 dark:text-white w-full"
-            />
-
-            <div className="flex flex-col w-full">
-              <input
-                type="text"
-                placeholder="e.g. study, dsa, exam"
-                value={tags}
-                onChange={(e) => setTags(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault()
-                    addTask()
-                  }
-                }}
-                className="border p-3 rounded-lg dark:bg-gray-700 dark:text-white w-full"
-              />
-
-              <p className="text-xs text-gray-400 mt-1 italic">
-                Separate tags using commas
-              </p>
-            </div>
-
-            <select
-              value={priority}
-              onChange={(e) => setPriority(e.target.value)}
-              className="border p-3 rounded-lg dark:bg-gray-700 dark:text-white w-full"
-            >
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-            </select>
-
-          </div>
-
-          {/* FIX #2: Add Task form correctly uses global `category` state */}
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="border p-2 rounded"
-          >
-            <option value="work">Work</option>
-            <option value="study">Study</option>
-            <option value="personal">Personal</option>
-          </select>
-
-          {/* DATE ROW */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
-
-            <DatePicker
-              selected={startTime}
-              onChange={(date) => setStartTime(date)}
-              showTimeSelect
-              placeholderText="Start Time"
-              className="border p-3 rounded-lg w-full dark:bg-gray-700 dark:text-white"
-            />
-
-            <DatePicker
-              selected={endTime}
-              onChange={(date) => setEndTime(date)}
-              showTimeSelect
-              placeholderText="End Time"
-              className="border p-3 rounded-lg w-full dark:bg-gray-700 dark:text-white"
-            />
-
-          </div>
-
-          {/* BUTTON ROW */}
-          <div className="flex justify-end gap-4 mt-2">
-
-            <button
-              onClick={addTask}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium shadow-md"
-            >
-              Add Task
-            </button>
-
-            {/* FIX #7: Use precomputed `allCompleted` instead of inline tasks.every() */}
-            <button
-              onClick={markAllCompleted}
-              disabled={bulkLoading || allCompleted}
-              className={`px-6 py-3 rounded-lg text-white transition font-medium shadow-md
-                ${bulkLoading || allCompleted
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-green-600 hover:bg-green-700"}
-              `}
-            >
-              {bulkLoading ? "Completing..." : "Complete All"}
-            </button>
-
-          </div>
-
-        </div>
+        <AddTaskForm
+          title={title}
+          setTitle={setTitle}
+          description={description}
+          setDescription={setDescription}
+          tags={tags}
+          setTags={setTags}
+          priority={priority}
+          setPriority={setPriority}
+          category={category}
+          setCategory={setCategory}
+          startTime={startTime}
+          setStartTime={setStartTime}
+          endTime={endTime}
+          setEndTime={setEndTime}
+          addTask={addTask}
+          markAllCompleted={markAllCompleted}
+          bulkLoading={bulkLoading}
+          allCompleted={allCompleted}
+        />
 
 
         {activeTag && (
