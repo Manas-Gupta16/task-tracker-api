@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom"
 import { useEffect, useState, useMemo } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import Confetti from "react-confetti"
 import "react-datepicker/dist/react-datepicker.css"
 
@@ -12,6 +12,7 @@ import DarkModeToggle from "../components/DarkModeToggle"
 import TaskCard from "../components/TaskCard"
 import AddTaskForm from "../components/AddTaskForm"
 import StatCard from "../components/StatCard"
+import TaskList from "../components/TaskList"
 
 import {
   formatTime,
@@ -482,50 +483,24 @@ function Dashboard() {
           </div>
         )}
 
-        {/* Tasks */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
-
-          <AnimatePresence>
-
-            {filteredTasks.map((task) => {
-
-              const status = getTaskStatus(task, now)
-
-              return (
-
-                <TaskCard
-                  key={task._id}
-                  task={task}
-                  status={status}
-                  now={now}
-                  editingTask={editingTask}
-                  setEditingTask={setEditingTask}
-                  saveEdit={saveEdit}
-                  startEdit={startEdit}
-                  deleteTask={deleteTask}
-                  toggleComplete={toggleComplete}
-                  activeTag={activeTag}
-                  setActiveTag={setActiveTag}
-                  getTagColor={getTagColor}
-                  getPriorityStyle={getPriorityStyle}
-                  formatPriority={formatPriority}
-                  formatTime={formatTime}
-                  getTimeRemaining={getTimeRemaining}
-                />
-
-              )
-
-            })}
-
-          </AnimatePresence>
-
-          {filteredTasks.length === 0 && (
-            <p className="text-center text-gray-500 dark:text-gray-400">
-              No tasks found
-            </p>
-          )}
-
-        </div>
+        <TaskList
+          filteredTasks={filteredTasks}
+          getTaskStatus={getTaskStatus}
+          now={now}
+          editingTask={editingTask}
+          setEditingTask={setEditingTask}
+          saveEdit={saveEdit}
+          startEdit={startEdit}
+          deleteTask={deleteTask}
+          toggleComplete={toggleComplete}
+          activeTag={activeTag}
+          setActiveTag={setActiveTag}
+          getTagColor={getTagColor}
+          getPriorityStyle={getPriorityStyle}
+          formatPriority={formatPriority}
+          formatTime={formatTime}
+          getTimeRemaining={getTimeRemaining}
+        />
 
       </div>
 
