@@ -1,15 +1,20 @@
 import { useNavigate } from "react-router-dom"
 import { useEffect, useState, useMemo } from "react"
-import { motion } from "framer-motion"
 import Confetti from "react-confetti"
 import "react-datepicker/dist/react-datepicker.css"
 
+import {
+  fetchTasksService,
+  fetchStatsService,
+  addTaskService,
+  deleteTaskService,
+  updateTaskService
+} from "../services/taskService"
 import API from "../services/api"
 import toast from "react-hot-toast"
 
 import Sidebar from "../components/Sidebar"
 import DarkModeToggle from "../components/DarkModeToggle"
-import TaskCard from "../components/TaskCard"
 import AddTaskForm from "../components/AddTaskForm"
 import StatCard from "../components/StatCard"
 import TaskList from "../components/TaskList"
@@ -117,18 +122,19 @@ function Dashboard() {
   }, [search])
 
   const fetchTasks = async () => {
+
     try {
-      const token = localStorage.getItem("token")
 
-      const res = await API.get("/tasks", {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+      const data = await fetchTasksService()
 
-      setTasks(res.data)
+      setTasks(data)
 
     } catch {
+
       toast.error("Failed to fetch tasks")
+
     }
+
   }
 
   // FIX #5: Extracted resetForm helper to avoid duplicate reset logic
@@ -151,28 +157,23 @@ function Dashboard() {
 
     try {
 
-      const token = localStorage.getItem("token")
 
-      const res = await API.post(
-        "/tasks",
-        {
-          title,
-          description,
-          tags: [...new Set(
-            tags
-              .split(",")
-              .map(t => t.trim().toLowerCase())
-              .filter(Boolean)
-          )],
-          priority,
-          category,
-          startTime: startTime?.toISOString(),
-          endTime: endTime?.toISOString()
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
+      const newTask = await addTaskService({
+        title,
+        description,
+        tags: [...new Set(
+          tags
+            .split(",")
+            .map(t => t.trim().toLowerCase())
+            .filter(Boolean)
+        )],
+        priority,
+        category,
+        startTime: startTime?.toISOString(),
+        endTime: endTime?.toISOString()
+      })
 
-      setTasks(prev => [res.data, ...prev])
+      setTasks(prev => [newTask, ...prev])
       fetchStats()
 
       // FIX #5: Use resetForm() instead of repeating state resets
@@ -192,68 +193,76 @@ function Dashboard() {
 
     try {
 
-      const token = localStorage.getItem("token")
+      await deleteTaskService(id)
 
-      await API.delete(`/tasks/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+      setTasks(prev =>
+        prev.filter(t => t._id !== id)
+      )
 
-      setTasks(prev => prev.filter(t => t._id !== id))
       fetchStats()
 
       toast.success("Task deleted")
 
     } catch (err) {
+
       console.error(err)
       toast.error("Error deleting task")
+
     }
 
   }
 
   const fetchStats = async () => {
+
     try {
-      const token = localStorage.getItem("token")
 
-      const res = await API.get("/tasks/stats", {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+      const data = await fetchStatsService()
 
-      setStats(res.data)
+      setStats(data)
 
     } catch (err) {
+
       console.error(err)
       toast.error("Failed to fetch tasks")
+
     }
+
   }
 
   const toggleComplete = async (task) => {
 
     try {
 
-      const token = localStorage.getItem("token")
-
-      const res = await API.put(
-        `/tasks/${task._id}`,
-        { completed: !task.completed },
-        { headers: { Authorization: `Bearer ${token}` } }
+      const updatedTask = await updateTaskService(
+        task._id,
+        { completed: !task.completed }
       )
 
       setTasks(prev =>
         prev.map(t =>
-          t._id === task._id ? res.data : t
+          t._id === task._id
+            ? updatedTask
+            : t
         )
       )
 
       fetchStats()
 
       if (!task.completed) {
+
         setConfetti(true)
-        setTimeout(() => setConfetti(false), 2000)
+
+        setTimeout(() => {
+          setConfetti(false)
+        }, 2000)
+
       }
 
     } catch (err) {
+
       console.error(err)
       toast.error("Error updating task")
+
     }
 
   }
@@ -277,8 +286,6 @@ function Dashboard() {
 
     try {
 
-      const token = localStorage.getItem("token")
-
       const updatedTask = {
         title: editingTask.title,
         description: editingTask.description,
@@ -289,32 +296,36 @@ function Dashboard() {
             .filter(Boolean)
           : [],
         priority: editingTask.priority,
-        // FIX #1: Always use editingTask.category in edit mode (not global category)
         category: editingTask.category,
         startTime: editingTask.startTime?.toISOString(),
         endTime: editingTask.endTime?.toISOString()
       }
 
-      const res = await API.put(
-        `/tasks/${editingTask._id}`,
-        updatedTask,
-        { headers: { Authorization: `Bearer ${token}` } }
+      const updatedData = await updateTaskService(
+        editingTask._id,
+        updatedTask
       )
 
       setTasks(prev =>
         prev.map(t =>
-          t._id === editingTask._id ? res.data : t
+          t._id === editingTask._id
+            ? updatedData
+            : t
         )
       )
 
       setEditingTask(null)
+
       fetchStats()
 
       toast.success("Task updated")
 
     } catch (err) {
+
       console.error(err)
+
       toast.error("Update failed")
+
     }
 
   }
