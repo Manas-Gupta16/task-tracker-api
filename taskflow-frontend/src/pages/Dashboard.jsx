@@ -19,6 +19,8 @@ import AddTaskForm from "../components/AddTaskForm"
 import StatCard from "../components/StatCard"
 import TaskList from "../components/TaskList"
 
+import useDebounce from "../hooks/useDebounce"
+
 import {
   formatTime,
   getTaskStatus,
@@ -42,7 +44,7 @@ function Dashboard() {
 
   const [filter, setFilter] = useState("all")
   const [search, setSearch] = useState("")
-  const [debouncedSearch, setDebouncedSearch] = useState("")
+  const debouncedSearch = useDebounce(search, 300)
 
   const [confetti, setConfetti] = useState(false)
   const [bulkLoading, setBulkLoading] = useState(false)
@@ -112,14 +114,6 @@ function Dashboard() {
 
     })
   }, [now, tasks, notifiedTasks])
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(search)
-    }, 300)
-
-    return () => clearTimeout(timer)
-  }, [search])
 
   const fetchTasks = async () => {
 
