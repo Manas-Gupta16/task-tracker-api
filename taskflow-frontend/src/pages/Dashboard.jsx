@@ -3,14 +3,6 @@ import { useEffect, useState, useMemo } from "react"
 import Confetti from "react-confetti"
 import "react-datepicker/dist/react-datepicker.css"
 
-import {
-  fetchTasksService,
-  fetchStatsService,
-  addTaskService,
-  deleteTaskService,
-  updateTaskService
-} from "../services/taskService"
-import API from "../services/api"
 import toast from "react-hot-toast"
 
 import Sidebar from "../components/Sidebar"
@@ -19,7 +11,10 @@ import AddTaskForm from "../components/AddTaskForm"
 import StatCard from "../components/StatCard"
 import TaskList from "../components/TaskList"
 
+import API from "../services/api"
+
 import useDebounce from "../hooks/useDebounce"
+import useTasks from "../hooks/useTasks"
 
 import {
   formatTime,
@@ -32,7 +27,6 @@ import {
 
 function Dashboard() {
 
-  const [tasks, setTasks] = useState([])
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [tags, setTags] = useState("")
@@ -55,21 +49,19 @@ function Dashboard() {
 
   const navigate = useNavigate()
 
-  const [stats, setStats] = useState({
-    total: 0,
-    completed: 0,
-    pending: 0,
-    highPriority: 0,
-    overdue: 0
-  })
+  const {
+    tasks,
+    stats,
+    setTasks,
+    fetchStats,
+    addTask,
+    deleteTask,
+    toggleComplete,
+    saveEdit
+  } = useTasks()
 
   // FIX #7: Precompute derived boolean for cleaner usage
   const allCompleted = tasks.every(t => t.completed)
-
-  useEffect(() => {
-    fetchTasks()
-    fetchStats()
-  }, [])
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -115,21 +107,6 @@ function Dashboard() {
     })
   }, [now, tasks, notifiedTasks])
 
-  const fetchTasks = async () => {
-
-    try {
-
-      const data = await fetchTasksService()
-
-      setTasks(data)
-
-    } catch {
-
-      toast.error("Failed to fetch tasks")
-
-    }
-
-  }
 
   // FIX #5: Extracted resetForm helper to avoid duplicate reset logic
   const resetForm = () => {
@@ -140,125 +117,6 @@ function Dashboard() {
     setCategory("personal")
     setStartTime(null)
     setEndTime(null)
-  }
-
-  const addTask = async () => {
-
-    if (!title.trim()) {
-      toast.error("Task cannot be empty")
-      return
-    }
-
-    try {
-
-
-      const newTask = await addTaskService({
-        title,
-        description,
-        tags: [...new Set(
-          tags
-            .split(",")
-            .map(t => t.trim().toLowerCase())
-            .filter(Boolean)
-        )],
-        priority,
-        category,
-        startTime: startTime?.toISOString(),
-        endTime: endTime?.toISOString()
-      })
-
-      setTasks(prev => [newTask, ...prev])
-      fetchStats()
-
-      // FIX #5: Use resetForm() instead of repeating state resets
-      resetForm()
-      setActiveTag(null)
-
-      toast.success("Task added")
-
-    } catch (err) {
-      console.error(err)
-      toast.error("Error adding task")
-    }
-
-  }
-
-  const deleteTask = async (id) => {
-
-    try {
-
-      await deleteTaskService(id)
-
-      setTasks(prev =>
-        prev.filter(t => t._id !== id)
-      )
-
-      fetchStats()
-
-      toast.success("Task deleted")
-
-    } catch (err) {
-
-      console.error(err)
-      toast.error("Error deleting task")
-
-    }
-
-  }
-
-  const fetchStats = async () => {
-
-    try {
-
-      const data = await fetchStatsService()
-
-      setStats(data)
-
-    } catch (err) {
-
-      console.error(err)
-      toast.error("Failed to fetch tasks")
-
-    }
-
-  }
-
-  const toggleComplete = async (task) => {
-
-    try {
-
-      const updatedTask = await updateTaskService(
-        task._id,
-        { completed: !task.completed }
-      )
-
-      setTasks(prev =>
-        prev.map(t =>
-          t._id === task._id
-            ? updatedTask
-            : t
-        )
-      )
-
-      fetchStats()
-
-      if (!task.completed) {
-
-        setConfetti(true)
-
-        setTimeout(() => {
-          setConfetti(false)
-        }, 2000)
-
-      }
-
-    } catch (err) {
-
-      console.error(err)
-      toast.error("Error updating task")
-
-    }
-
   }
 
   const startEdit = (task) => {
@@ -273,54 +131,6 @@ function Dashboard() {
       startTime: task.startTime ? new Date(task.startTime) : null,
       endTime: task.endTime ? new Date(task.endTime) : null
     })
-
-  }
-
-  const saveEdit = async () => {
-
-    try {
-
-      const updatedTask = {
-        title: editingTask.title,
-        description: editingTask.description,
-        tags: editingTask.tags
-          ? editingTask.tags
-            .split(",")
-            .map(t => t.trim().toLowerCase())
-            .filter(Boolean)
-          : [],
-        priority: editingTask.priority,
-        category: editingTask.category,
-        startTime: editingTask.startTime?.toISOString(),
-        endTime: editingTask.endTime?.toISOString()
-      }
-
-      const updatedData = await updateTaskService(
-        editingTask._id,
-        updatedTask
-      )
-
-      setTasks(prev =>
-        prev.map(t =>
-          t._id === editingTask._id
-            ? updatedData
-            : t
-        )
-      )
-
-      setEditingTask(null)
-
-      fetchStats()
-
-      toast.success("Task updated")
-
-    } catch (err) {
-
-      console.error(err)
-
-      toast.error("Update failed")
-
-    }
 
   }
 
@@ -466,7 +276,28 @@ function Dashboard() {
           setStartTime={setStartTime}
           endTime={endTime}
           setEndTime={setEndTime}
-          addTask={addTask}
+
+          addTask={() =>
+            addTask(
+              {
+                title,
+                description,
+                tags: [...new Set(
+                  tags
+                    .split(",")
+                    .map(t => t.trim().toLowerCase())
+                    .filter(Boolean)
+                )],
+                priority,
+                category,
+                startTime: startTime?.toISOString(),
+                endTime: endTime?.toISOString()
+              },
+              resetForm,
+              setActiveTag
+            )
+          }
+
           markAllCompleted={markAllCompleted}
           bulkLoading={bulkLoading}
           allCompleted={allCompleted}
@@ -494,10 +325,14 @@ function Dashboard() {
           now={now}
           editingTask={editingTask}
           setEditingTask={setEditingTask}
-          saveEdit={saveEdit}
+          saveEdit={() =>
+            saveEdit(editingTask, setEditingTask)
+          }
           startEdit={startEdit}
           deleteTask={deleteTask}
-          toggleComplete={toggleComplete}
+          toggleComplete={(task) =>
+            toggleComplete(task, setConfetti)
+          }
           activeTag={activeTag}
           setActiveTag={setActiveTag}
           getTagColor={getTagColor}
