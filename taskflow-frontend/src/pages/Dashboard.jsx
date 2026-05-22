@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom"
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useState, useMemo, useCallback } from "react"
 import Confetti from "react-confetti"
 import "react-datepicker/dist/react-datepicker.css"
 
@@ -220,6 +220,17 @@ function Dashboard() {
     })
   }, [tasks, filter, debouncedSearch, activeTag])
 
+  const handleToggleComplete = useCallback(
+    (task) => {
+      toggleComplete(task, setConfetti)
+    },
+    [toggleComplete]
+  )
+
+  const handleSaveEdit = useCallback(() => {
+    saveEdit(editingTask, setEditingTask)
+  }, [saveEdit, editingTask])
+
   return (
 
     <div className="flex min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 dark:from-gray-900 dark:to-black">
@@ -325,14 +336,10 @@ function Dashboard() {
           now={now}
           editingTask={editingTask}
           setEditingTask={setEditingTask}
-          saveEdit={() =>
-            saveEdit(editingTask, setEditingTask)
-          }
+          saveEdit={handleSaveEdit}
           startEdit={startEdit}
           deleteTask={deleteTask}
-          toggleComplete={(task) =>
-            toggleComplete(task, setConfetti)
-          }
+          toggleComplete={handleToggleComplete}
           activeTag={activeTag}
           setActiveTag={setActiveTag}
           getTagColor={getTagColor}

@@ -1,8 +1,9 @@
+import React from "react"
 import { AnimatePresence } from "framer-motion"
 
 import TaskCard from "./TaskCard"
 
-function TaskList({
+const TaskList = React.memo(function TaskList({
     filteredTasks,
     getTaskStatus,
     now,
@@ -20,6 +21,8 @@ function TaskList({
     formatTime,
     getTimeRemaining
 }) {
+
+    console.log("TaskList render")
 
     return (
 
@@ -68,6 +71,6 @@ function TaskList({
 
     )
 
-}
+})
 
 export default TaskList
