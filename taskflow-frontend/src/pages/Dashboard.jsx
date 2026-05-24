@@ -109,7 +109,7 @@ function Dashboard() {
 
 
   // FIX #5: Extracted resetForm helper to avoid duplicate reset logic
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setTitle("")
     setDescription("")
     setTags("")
@@ -117,9 +117,9 @@ function Dashboard() {
     setCategory("personal")
     setStartTime(null)
     setEndTime(null)
-  }
+  }, [])
 
-  const startEdit = (task) => {
+  const startEdit = useCallback((task) => {
 
     setEditingTask({
       _id: task._id,
@@ -132,7 +132,7 @@ function Dashboard() {
       endTime: task.endTime ? new Date(task.endTime) : null
     })
 
-  }
+  }, [])
 
   const logout = () => {
     localStorage.removeItem("token")
@@ -231,6 +231,38 @@ function Dashboard() {
     saveEdit(editingTask, setEditingTask)
   }, [saveEdit, editingTask])
 
+  const handleAddTask = useCallback(() => {
+
+    addTask(
+      {
+        title,
+        description,
+        tags: [...new Set(
+          tags
+            .split(",")
+            .map(t => t.trim().toLowerCase())
+            .filter(Boolean)
+        )],
+        priority,
+        category,
+        startTime: startTime?.toISOString(),
+        endTime: endTime?.toISOString()
+      },
+      resetForm,
+      setActiveTag
+    )
+
+  }, [
+    addTask,
+    title,
+    description,
+    tags,
+    priority,
+    category,
+    startTime,
+    endTime
+  ])
+
   return (
 
     <div className="flex min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 dark:from-gray-900 dark:to-black">
@@ -288,26 +320,7 @@ function Dashboard() {
           endTime={endTime}
           setEndTime={setEndTime}
 
-          addTask={() =>
-            addTask(
-              {
-                title,
-                description,
-                tags: [...new Set(
-                  tags
-                    .split(",")
-                    .map(t => t.trim().toLowerCase())
-                    .filter(Boolean)
-                )],
-                priority,
-                category,
-                startTime: startTime?.toISOString(),
-                endTime: endTime?.toISOString()
-              },
-              resetForm,
-              setActiveTag
-            )
-          }
+          addTask={handleAddTask}
 
           markAllCompleted={markAllCompleted}
           bulkLoading={bulkLoading}
