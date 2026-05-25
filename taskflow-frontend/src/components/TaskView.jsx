@@ -1,3 +1,5 @@
+import { memo, useCallback } from "react"
+
 function TaskView({
     task,
     status,
@@ -14,6 +16,24 @@ function TaskView({
     deleteTask
 }) {
 
+    const handleToggle = useCallback(() => {
+        toggleComplete(task)
+    }, [toggleComplete, task])
+
+    const handleEdit = useCallback(() => {
+        startEdit(task)
+    }, [startEdit, task])
+
+    const handleDelete = useCallback(() => {
+        deleteTask(task._id)
+    }, [deleteTask, task])
+
+    const handleTagClick = useCallback((tag) => {
+        setActiveTag(prev =>
+            prev === tag ? null : tag
+        )
+    }, [setActiveTag])
+
     return (
 
         <div className="flex items-center justify-between">
@@ -23,7 +43,7 @@ function TaskView({
                 <input
                     type="checkbox"
                     checked={task.completed}
-                    onChange={() => toggleComplete(task)}
+                    onChange={handleToggle}
                 />
 
                 <div>
@@ -58,11 +78,7 @@ function TaskView({
 
                                 <span
                                     key={index}
-                                    onClick={() =>
-                                        setActiveTag(prev =>
-                                            prev === tag ? null : tag
-                                        )
-                                    }
+                                    onClick={() => handleTagClick(tag)}
                                     className={`cursor-pointer px-2 py-1 rounded-full text-xs font-medium text-white transition
                                         ${activeTag === tag
                                             ? "bg-blue-700 scale-105"
@@ -115,14 +131,14 @@ function TaskView({
             <div className="flex gap-3">
 
                 <button
-                    onClick={() => startEdit(task)}
+                    onClick={handleEdit}
                     className="text-blue-600"
                 >
                     Edit
                 </button>
 
                 <button
-                    onClick={() => deleteTask(task._id)}
+                    onClick={handleDelete}
                     className="text-red-600"
                 >
                     Delete
@@ -136,4 +152,4 @@ function TaskView({
 
 }
 
-export default TaskView
+export default memo(TaskView)
