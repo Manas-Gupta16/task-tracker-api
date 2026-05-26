@@ -26,7 +26,7 @@ function TaskView({
 
     const handleDelete = useCallback(() => {
         deleteTask(task._id)
-    }, [deleteTask, task])
+    }, [deleteTask, task._id])
 
     const handleTagClick = useCallback((tag) => {
         setActiveTag(prev =>
@@ -94,7 +94,7 @@ function TaskView({
                         </div>
                     )}
 
-                    <div className="text-sm flex gap-3 mt-1 items-center">
+                    <div className="text-sm flex gap-3 mt-1 items-center flex-wrap">
 
                         <span className={getPriorityStyle(task.priority)}>
                             {formatPriority(task.priority)}
@@ -132,14 +132,14 @@ function TaskView({
 
                 <button
                     onClick={handleEdit}
-                    className="text-blue-600"
+                    className="text-blue-600 hover:underline"
                 >
                     Edit
                 </button>
 
                 <button
                     onClick={handleDelete}
-                    className="text-red-600"
+                    className="text-red-600 hover:underline"
                 >
                     Delete
                 </button>
