@@ -215,15 +215,15 @@ function useTasks() {
     }
 
     return {
-    tasks,
-    stats,
-    setTasks,
-    fetchStats,
-    addTask,
-    deleteTask,
-    toggleComplete,
-    saveEdit
-}
+        tasks,
+        stats,
+        setTasks,
+        fetchStats,
+        addTask,
+        deleteTask,
+        toggleComplete,
+        saveEdit
+    }
 
 }
 

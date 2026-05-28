@@ -1,9 +1,9 @@
-import React from "react"
+import { memo } from "react"
 import { AnimatePresence } from "framer-motion"
 
 import TaskCard from "./TaskCard"
 
-const TaskList = React.memo(function TaskList({
+const TaskList = memo(function TaskList({
     filteredTasks,
     getTaskStatus,
     now,
@@ -40,6 +40,7 @@ const TaskList = React.memo(function TaskList({
                             key={task._id}
                             task={task}
                             status={status}
+                            now={now}
                             editingTask={editingTask}
                             setEditingTask={setEditingTask}
                             saveEdit={saveEdit}
