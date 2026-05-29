@@ -1,4 +1,6 @@
+import { memo } from "react"
 import { motion } from "framer-motion"
+
 import TaskEditForm from "./TaskEditForm"
 import TaskView from "./TaskView"
 
@@ -21,10 +23,11 @@ function TaskCard({
     getTimeRemaining
 }) {
 
+    console.log("TaskCard render:", task.title)
+
     return (
 
         <motion.div
-            key={task._id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, x: -20 }}
@@ -73,4 +76,4 @@ function TaskCard({
 
 }
 
-export default TaskCard
+export default memo(TaskCard)
