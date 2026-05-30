@@ -1,10 +1,10 @@
-import { memo } from "react"
+import React from "react"
 import { motion } from "framer-motion"
 
 import TaskEditForm from "./TaskEditForm"
 import TaskView from "./TaskView"
 
-function TaskCard({
+const TaskCard = React.memo(function TaskCard({
     task,
     status,
     now,
@@ -74,6 +74,6 @@ function TaskCard({
 
     )
 
-}
+})
 
-export default memo(TaskCard)
+export default TaskCard
