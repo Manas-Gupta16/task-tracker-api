@@ -1,6 +1,5 @@
 import React from "react"
 import { motion } from "framer-motion"
-
 import TaskEditForm from "./TaskEditForm"
 import TaskView from "./TaskView"
 
