@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom"
-import { useEffect, useState, useMemo, useCallback } from "react"
+import { useState, useMemo, useCallback } from "react"
 import Confetti from "react-confetti"
 import "react-datepicker/dist/react-datepicker.css"
 
@@ -46,7 +46,7 @@ function Dashboard() {
 
   const [category, setCategory] = useState("personal")
 
-  const now = useTaskNotifications(tasks)
+
   const navigate = useNavigate()
 
   const {
@@ -60,53 +60,10 @@ function Dashboard() {
     saveEdit
   } = useTasks()
 
+  const now = useTaskNotifications(tasks)
+
   // FIX #7: Precompute derived boolean for cleaner usage
   const allCompleted = tasks.every(t => t.completed)
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setNow(Date.now())
-    }, 60000)
-
-    return () => clearInterval(interval)
-  }, [])
-
-  // FIX #3: Added notifiedTasks to dependency array to avoid stale closure bug
-  useEffect(() => {
-    tasks.forEach(task => {
-
-      if (!task.endTime || task.completed) return
-
-      const end = new Date(task.endTime).getTime()
-      const diff = end - now
-
-      const alreadyNotified = notifiedTasks.has(task._id)
-
-      if (diff > 0 && diff <= 60 * 60 * 1000 && !alreadyNotified) {
-        toast(`⏳ "${task.title}" is due soon!`)
-
-        // FIX #4: Safe Set mutation — create new Set instead of mutating
-        setNotifiedTasks(prev => {
-          const newSet = new Set(prev)
-          newSet.add(task._id)
-          return newSet
-        })
-      }
-
-      if (diff <= 0 && !alreadyNotified) {
-        toast.error(`⚠️ "${task.title}" is overdue!`)
-
-        // FIX #4: Safe Set mutation — create new Set instead of mutating
-        setNotifiedTasks(prev => {
-          const newSet = new Set(prev)
-          newSet.add(task._id)
-          return newSet
-        })
-      }
-
-    })
-  }, [now, tasks, notifiedTasks])
-
 
   // FIX #5: Extracted resetForm helper to avoid duplicate reset logic
   const resetForm = useCallback(() => {
