@@ -15,6 +15,7 @@ import API from "../services/api"
 
 import useDebounce from "../hooks/useDebounce"
 import useTasks from "../hooks/useTasks"
+import useTaskNotifications from "../hooks/useTaskNotifications"
 
 import {
   formatTime,
@@ -43,10 +44,9 @@ function Dashboard() {
   const [confetti, setConfetti] = useState(false)
   const [bulkLoading, setBulkLoading] = useState(false)
 
-  const [now, setNow] = useState(Date.now())
-  const [notifiedTasks, setNotifiedTasks] = useState(new Set())
   const [category, setCategory] = useState("personal")
 
+  const now = useTaskNotifications(tasks)
   const navigate = useNavigate()
 
   const {
