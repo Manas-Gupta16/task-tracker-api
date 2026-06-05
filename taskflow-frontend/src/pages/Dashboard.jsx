@@ -13,9 +13,11 @@ import TaskList from "../components/TaskList"
 
 import API from "../services/api"
 
+//hooks
 import useDebounce from "../hooks/useDebounce"
 import useTasks from "../hooks/useTasks"
 import useTaskNotifications from "../hooks/useTaskNotifications"
+import useTaskFilters from "../hooks/useTaskFilters"
 
 import {
   formatTime,
@@ -151,31 +153,12 @@ function Dashboard() {
     [tasks]
   )
 
-  const filteredTasks = useMemo(() => {
-    return tasks.filter(task => {
-
-      const matchesFilter =
-        filter === "completed"
-          ? task.completed
-          : filter === "pending"
-            ? !task.completed
-            : true
-
-      const matchesSearch =
-        task.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        (task.tags || []).some(tag =>
-          tag.toLowerCase().includes(debouncedSearch.toLowerCase())
-        )
-
-      const matchesTag =
-        !activeTag ||
-        (task.tags || []).some(tag =>
-          tag.toLowerCase() === activeTag.toLowerCase()
-        )
-
-      return matchesFilter && matchesSearch && matchesTag
-    })
-  }, [tasks, filter, debouncedSearch, activeTag])
+  const filteredTasks = useTaskFilters(
+    tasks,
+    filter,
+    debouncedSearch,
+    activeTag
+  )
 
   const handleToggleComplete = useCallback(
     (task) => {
@@ -217,7 +200,9 @@ function Dashboard() {
     priority,
     category,
     startTime,
-    endTime
+    endTime,
+    resetForm,
+    setActiveTag
   ])
 
   return (
