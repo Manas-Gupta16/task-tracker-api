@@ -18,6 +18,7 @@ import useDebounce from "../hooks/useDebounce"
 import useTasks from "../hooks/useTasks"
 import useTaskNotifications from "../hooks/useTaskNotifications"
 import useTaskFilters from "../hooks/useTaskFilters"
+import useBulkComplete from "../hooks/useBulkComplete"
 
 import {
   formatTime,
@@ -44,7 +45,6 @@ function Dashboard() {
   const debouncedSearch = useDebounce(search, 300)
 
   const [confetti, setConfetti] = useState(false)
-  const [bulkLoading, setBulkLoading] = useState(false)
 
   const [category, setCategory] = useState("personal")
 
@@ -98,54 +98,15 @@ function Dashboard() {
     navigate("/")
   }
 
-  const markAllCompleted = async () => {
-    try {
-      setBulkLoading(true)
-
-      const token = localStorage.getItem("token")
-
-      const incompleteTasks = tasks.filter(t => !t.completed)
-
-      if (incompleteTasks.length === 0) {
-        toast("All tasks already completed")
-        setBulkLoading(false)
-        return
-      }
-
-      const updatedResponses = await Promise.all(
-        incompleteTasks.map(task =>
-          API.put(
-            `/tasks/${task._id}`,
-            { completed: true },
-            { headers: { Authorization: `Bearer ${token}` } }
-          )
-        )
-      )
-
-      const updatedTasksMap = new Map(
-        updatedResponses.map(res => [res.data._id, res.data])
-      )
-
-      setTasks(prev =>
-        prev.map(task =>
-          updatedTasksMap.get(task._id) || task
-        )
-      )
-
-      fetchStats()
-
-      setConfetti(true)
-      setTimeout(() => setConfetti(false), 2000)
-
-      toast.success("All tasks completed 🚀")
-
-    } catch (err) {
-      console.error(err)
-      toast.error("Failed to update stats")
-    } finally {
-      setBulkLoading(false)
-    }
-  }
+  const {
+    bulkLoading,
+    markAllCompleted
+  } = useBulkComplete(
+    tasks,
+    setTasks,
+    fetchStats,
+    setConfetti
+  )
 
   // FIX #8: Memoized allTags to avoid recalculating on every render
   const allTags = useMemo(() =>
