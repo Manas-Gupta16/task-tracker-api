@@ -19,6 +19,7 @@ import useTasks from "../hooks/useTasks"
 import useTaskNotifications from "../hooks/useTaskNotifications"
 import useTaskFilters from "../hooks/useTaskFilters"
 import useBulkComplete from "../hooks/useBulkComplete"
+import useTaskEditing from "../hooks/useTaskEditing"
 
 import {
   formatTime,
@@ -38,7 +39,6 @@ function Dashboard() {
   const [priority, setPriority] = useState("medium")
   const [startTime, setStartTime] = useState(null)
   const [endTime, setEndTime] = useState(null)
-  const [editingTask, setEditingTask] = useState(null)
 
   const [filter, setFilter] = useState("all")
   const [search, setSearch] = useState("")
@@ -62,6 +62,13 @@ function Dashboard() {
     saveEdit
   } = useTasks()
 
+  const {
+    editingTask,
+    setEditingTask,
+    startEdit,
+    handleSaveEdit
+  } = useTaskEditing(saveEdit)
+
   const now = useTaskNotifications(tasks)
 
   // FIX #7: Precompute derived boolean for cleaner usage
@@ -76,21 +83,6 @@ function Dashboard() {
     setCategory("personal")
     setStartTime(null)
     setEndTime(null)
-  }, [])
-
-  const startEdit = useCallback((task) => {
-
-    setEditingTask({
-      _id: task._id,
-      title: task.title,
-      description: task.description || "",
-      tags: task.tags ? task.tags.join(", ") : "",
-      priority: task.priority,
-      category: task.category,
-      startTime: task.startTime ? new Date(task.startTime) : null,
-      endTime: task.endTime ? new Date(task.endTime) : null
-    })
-
   }, [])
 
   const logout = () => {
@@ -127,10 +119,6 @@ function Dashboard() {
     },
     [toggleComplete]
   )
-
-  const handleSaveEdit = useCallback(() => {
-    saveEdit(editingTask, setEditingTask)
-  }, [saveEdit, editingTask])
 
   const handleAddTask = useCallback(() => {
 
