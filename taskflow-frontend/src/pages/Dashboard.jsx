@@ -20,6 +20,7 @@ import useTaskNotifications from "../hooks/useTaskNotifications"
 import useTaskFilters from "../hooks/useTaskFilters"
 import useBulkComplete from "../hooks/useBulkComplete"
 import useTaskEditing from "../hooks/useTaskEditing"
+import useTaskForm from "../hooks/useTaskForm"
 
 import {
   formatTime,
@@ -32,21 +33,13 @@ import {
 
 function Dashboard() {
 
-  const [title, setTitle] = useState("")
-  const [description, setDescription] = useState("")
-  const [tags, setTags] = useState("")
-  const [activeTag, setActiveTag] = useState(null)
-  const [priority, setPriority] = useState("medium")
-  const [startTime, setStartTime] = useState(null)
-  const [endTime, setEndTime] = useState(null)
-
   const [filter, setFilter] = useState("all")
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebounce(search, 300)
 
   const [confetti, setConfetti] = useState(false)
 
-  const [category, setCategory] = useState("personal")
+  const [activeTag, setActiveTag] = useState(null)
 
 
   const navigate = useNavigate()
@@ -63,6 +56,27 @@ function Dashboard() {
   } = useTasks()
 
   const {
+    title,
+    setTitle,
+    description,
+    setDescription,
+    tags,
+    setTags,
+    priority,
+    setPriority,
+    category,
+    setCategory,
+    startTime,
+    setStartTime,
+    endTime,
+    setEndTime,
+    handleAddTask
+  } = useTaskForm(
+    addTask,
+    setActiveTag
+  )
+
+  const {
     editingTask,
     setEditingTask,
     startEdit,
@@ -73,17 +87,6 @@ function Dashboard() {
 
   // FIX #7: Precompute derived boolean for cleaner usage
   const allCompleted = tasks.every(t => t.completed)
-
-  // FIX #5: Extracted resetForm helper to avoid duplicate reset logic
-  const resetForm = useCallback(() => {
-    setTitle("")
-    setDescription("")
-    setTags("")
-    setPriority("medium")
-    setCategory("personal")
-    setStartTime(null)
-    setEndTime(null)
-  }, [])
 
   const logout = () => {
     localStorage.removeItem("token")
@@ -119,40 +122,6 @@ function Dashboard() {
     },
     [toggleComplete]
   )
-
-  const handleAddTask = useCallback(() => {
-
-    addTask(
-      {
-        title,
-        description,
-        tags: [...new Set(
-          tags
-            .split(",")
-            .map(t => t.trim().toLowerCase())
-            .filter(Boolean)
-        )],
-        priority,
-        category,
-        startTime: startTime?.toISOString(),
-        endTime: endTime?.toISOString()
-      },
-      resetForm,
-      setActiveTag
-    )
-
-  }, [
-    addTask,
-    title,
-    description,
-    tags,
-    priority,
-    category,
-    startTime,
-    endTime,
-    resetForm,
-    setActiveTag
-  ])
 
   return (
 
