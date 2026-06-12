@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom"
-import { useState, useMemo, useCallback } from "react"
+import { useState, useCallback } from "react"
 import Confetti from "react-confetti"
 import "react-datepicker/dist/react-datepicker.css"
 
@@ -21,6 +21,7 @@ import useTaskFilters from "../hooks/useTaskFilters"
 import useBulkComplete from "../hooks/useBulkComplete"
 import useTaskEditing from "../hooks/useTaskEditing"
 import useTaskForm from "../hooks/useTaskForm"
+import useTaskTags from "../hooks/useTaskTags"
 
 import {
   formatTime,
@@ -103,11 +104,7 @@ function Dashboard() {
     setConfetti
   )
 
-  // FIX #8: Memoized allTags to avoid recalculating on every render
-  const allTags = useMemo(() =>
-    [...new Set(tasks.flatMap(task => task.tags || []))],
-    [tasks]
-  )
+  const allTags = useTaskTags(tasks)
 
   const filteredTasks = useTaskFilters(
     tasks,
