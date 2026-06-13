@@ -10,6 +10,7 @@ import DarkModeToggle from "../components/DarkModeToggle"
 import AddTaskForm from "../components/AddTaskForm"
 import StatCard from "../components/StatCard"
 import TaskList from "../components/TaskList"
+import RecentTasks from "../components/RecentTasks"
 
 import API from "../services/api"
 
@@ -22,6 +23,7 @@ import useBulkComplete from "../hooks/useBulkComplete"
 import useTaskEditing from "../hooks/useTaskEditing"
 import useTaskForm from "../hooks/useTaskForm"
 import useTaskTags from "../hooks/useTaskTags"
+import useRecentTasks from "../hooks/useRecentTasks"
 
 import {
   formatTime,
@@ -43,6 +45,7 @@ function Dashboard() {
   const [activeTag, setActiveTag] = useState(null)
 
 
+
   const navigate = useNavigate()
 
   const {
@@ -55,6 +58,8 @@ function Dashboard() {
     toggleComplete,
     saveEdit
   } = useTasks()
+
+  const recentTasks = useRecentTasks(tasks)
 
   const {
     title,
@@ -150,6 +155,8 @@ function Dashboard() {
           <StatCard title="High Priority" value={stats.highPriority} color="text-orange-500" />
           <StatCard title="Overdue" value={stats.overdue} color="text-red-600" />
         </div>
+
+        <RecentTasks tasks={recentTasks} />
 
         {/* Search */}
         <input
