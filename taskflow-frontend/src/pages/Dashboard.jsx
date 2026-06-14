@@ -3,16 +3,13 @@ import { useState, useCallback } from "react"
 import Confetti from "react-confetti"
 import "react-datepicker/dist/react-datepicker.css"
 
-import toast from "react-hot-toast"
-
 import Sidebar from "../components/Sidebar"
 import DarkModeToggle from "../components/DarkModeToggle"
 import AddTaskForm from "../components/AddTaskForm"
 import StatCard from "../components/StatCard"
 import TaskList from "../components/TaskList"
 import RecentTasks from "../components/RecentTasks"
-
-import API from "../services/api"
+import UpcomingTasks from "../components/UpcomingTasks"
 
 //hooks
 import useDebounce from "../hooks/useDebounce"
@@ -24,6 +21,7 @@ import useTaskEditing from "../hooks/useTaskEditing"
 import useTaskForm from "../hooks/useTaskForm"
 import useTaskTags from "../hooks/useTaskTags"
 import useRecentTasks from "../hooks/useRecentTasks"
+import useUpcomingTasks from "../hooks/useUpcomingTasks"
 
 import {
   formatTime,
@@ -60,6 +58,7 @@ function Dashboard() {
   } = useTasks()
 
   const recentTasks = useRecentTasks(tasks)
+  const upcomingTasks = useUpcomingTasks(tasks)
 
   const {
     title,
@@ -156,7 +155,10 @@ function Dashboard() {
           <StatCard title="Overdue" value={stats.overdue} color="text-red-600" />
         </div>
 
-        <RecentTasks tasks={recentTasks} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <RecentTasks tasks={recentTasks} />
+          <UpcomingTasks tasks={upcomingTasks} />
+        </div>
 
         {/* Search */}
         <input
