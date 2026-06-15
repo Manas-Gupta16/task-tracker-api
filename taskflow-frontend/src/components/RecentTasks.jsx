@@ -2,62 +2,60 @@ import timeAgo from "../utils/timeAgo"
 
 function RecentTasks({ tasks }) {
 
-    if (tasks.length === 0) {
+    return (
 
-        return (
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-5 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-5">
 
-                <h2 className="text-xl font-semibold mb-4 dark:text-white">
+            <div className="flex justify-between items-center mb-4">
+
+                <h2 className="text-xl font-semibold dark:text-white">
                     Recent Tasks
                 </h2>
+
+                <span className="text-sm text-gray-500">
+                    {tasks.length}
+                </span>
+
+            </div>
+
+            {tasks.length === 0 ? (
 
                 <p className="text-gray-500">
                     No tasks yet
                 </p>
 
-            </div>
-        )
+            ) : (
 
-    }
+                <div className="space-y-3">
 
-    return (
+                    {tasks.map(task => (
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-5 mb-6">
+                        <div
+                            key={task._id}
+                            className="border-b border-gray-300 dark:border-gray-700 pb-2 last:border-none"
+                        >
 
-            <h2 className="text-xl font-semibold mb-4 dark:text-white">
-                Recent Tasks
-            </h2>
+                            <h3 className="font-medium dark:text-white">
+                                {task.title}
+                            </h3>
 
-            <div className="space-y-4">
+                            <p className="text-sm text-gray-500">
 
-                {tasks.map(task => (
+                                {task.category}
+                                {" • "}
+                                {task.priority}
+                                {" • "}
+                                {timeAgo(task.createdAt)}
 
-                    <div
-                        key={task._id}
-                        className="border-b border-gray-300 dark:border-gray-700 pb-3 last:border-none"
-                    >
+                            </p>
 
-                        <h3 className="font-medium text-lg dark:text-white">
-                            {task.title}
-                        </h3>
+                        </div>
 
-                        <p className="text-sm text-gray-500">
-                            Category: {task.category}
-                        </p>
+                    ))}
 
-                        <p className="text-sm text-gray-500">
-                            Priority: {task.priority}
-                        </p>
+                </div>
 
-                        <p className="text-sm text-gray-500">
-                            Created: {timeAgo(task.createdAt)}
-                        </p>
-
-                    </div>
-
-                ))}
-
-            </div>
+            )}
 
         </div>
 

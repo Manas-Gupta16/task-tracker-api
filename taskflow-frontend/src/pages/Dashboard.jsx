@@ -10,6 +10,7 @@ import StatCard from "../components/StatCard"
 import TaskList from "../components/TaskList"
 import RecentTasks from "../components/RecentTasks"
 import UpcomingTasks from "../components/UpcomingTasks"
+import CategoryStats from "../components/CategoryStats"
 
 //hooks
 import useDebounce from "../hooks/useDebounce"
@@ -22,6 +23,7 @@ import useTaskForm from "../hooks/useTaskForm"
 import useTaskTags from "../hooks/useTaskTags"
 import useRecentTasks from "../hooks/useRecentTasks"
 import useUpcomingTasks from "../hooks/useUpcomingTasks"
+import useCategoryStats from "../hooks/useCategoryStats"
 
 import {
   formatTime,
@@ -59,6 +61,7 @@ function Dashboard() {
 
   const recentTasks = useRecentTasks(tasks)
   const upcomingTasks = useUpcomingTasks(tasks)
+  const categoryStats = useCategoryStats(tasks)
 
   const {
     title,
@@ -155,9 +158,14 @@ function Dashboard() {
           <StatCard title="Overdue" value={stats.overdue} color="text-red-600" />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+
           <RecentTasks tasks={recentTasks} />
+
           <UpcomingTasks tasks={upcomingTasks} />
+
+          <CategoryStats stats={categoryStats} />
+
         </div>
 
         {/* Search */}

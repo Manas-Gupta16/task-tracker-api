@@ -14,44 +14,62 @@ function UpcomingTasks({ tasks }) {
             Math.floor(hours / 24)
 
         if (days > 0)
-            return `Due in ${days} day${days > 1 ? "s" : ""}`
+            return `${days}d`
 
         if (hours > 0)
-            return `Due in ${hours} hour${hours > 1 ? "s" : ""}`
+            return `${hours}h`
 
-        return "Due soon"
+        return "soon"
     }
 
     return (
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-5 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-5">
 
-            <h2 className="text-xl font-semibold mb-4 dark:text-white">
-                Upcoming Deadlines
-            </h2>
+            <div className="flex justify-between items-center mb-4">
 
-            <div className="space-y-4">
+                <h2 className="text-xl font-semibold dark:text-white">
+                    Upcoming Deadlines
+                </h2>
 
-                {tasks.map(task => (
-
-                    <div
-                        key={task._id}
-                        className="border-b pb-3"
-                    >
-
-                        <h3 className="font-semibold dark:text-white">
-                            {task.title}
-                        </h3>
-
-                        <p className="text-sm text-gray-500">
-                            {getDueText(task.endTime)}
-                        </p>
-
-                    </div>
-
-                ))}
+                <span className="text-sm text-gray-500">
+                    {tasks.length}
+                </span>
 
             </div>
+
+            {tasks.length === 0 ? (
+
+                <p className="text-gray-500">
+                    No upcoming deadlines
+                </p>
+
+            ) : (
+
+                <div className="space-y-3">
+
+                    {tasks.map(task => (
+
+                        <div
+                            key={task._id}
+                            className="flex justify-between border-b border-gray-300 dark:border-gray-700 pb-2 last:border-none"
+                        >
+
+                            <span className="dark:text-white">
+                                {task.title}
+                            </span>
+
+                            <span className="text-gray-500">
+                                {getDueText(task.endTime)}
+                            </span>
+
+                        </div>
+
+                    ))}
+
+                </div>
+
+            )}
 
         </div>
 
