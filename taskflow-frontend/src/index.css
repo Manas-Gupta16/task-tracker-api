@@ -6,6 +6,10 @@
 transition: background-color 0.5s ease, color 0.5s ease;
 }
 
-body{
-font-family: system-ui, sans-serif;
+body {
+  @apply font-sans antialiased text-gray-900 bg-white dark:text-gray-100 dark:bg-gray-900;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  @apply font-display;
 }

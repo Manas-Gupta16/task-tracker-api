@@ -49,7 +49,7 @@ function useTaskForm(
                     tags
                         .split(",")
                         .map(t =>
-                            t.trim().toLowerCase()
+                            t.trim()
                         )
                         .filter(Boolean)
                 )],

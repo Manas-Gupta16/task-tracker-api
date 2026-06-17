@@ -171,7 +171,7 @@ function useTasks() {
                 tags: editingTask.tags
                     ? editingTask.tags
                         .split(",")
-                        .map(t => t.trim().toLowerCase())
+                        .map(t => t.trim())
                         .filter(Boolean)
                     : [],
 

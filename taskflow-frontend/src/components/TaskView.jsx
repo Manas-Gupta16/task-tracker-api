@@ -59,7 +59,7 @@ function TaskView({
                             {task.title}
                         </span>
 
-                        <span className="text-xs px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">
+                        <span className="text-xs px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded capitalize">
                             {task.category}
                         </span>
 
@@ -79,7 +79,7 @@ function TaskView({
                                 <span
                                     key={index}
                                     onClick={() => handleTagClick(tag)}
-                                    className={`cursor-pointer px-2 py-1 rounded-full text-xs font-medium text-white transition
+                                    className={`cursor-pointer px-2 py-1 rounded-full text-xs font-medium text-white transition capitalize
                                         ${activeTag === tag
                                             ? "bg-blue-700 scale-105"
                                             : getTagColor(tag)
