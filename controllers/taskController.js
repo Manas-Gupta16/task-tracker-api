@@ -29,8 +29,15 @@ exports.getTasks = async (req, res) => {
   try {
     const tasks = await Task.find({ user: req.user._id })
       .sort({ createdAt: -1 })
+    const mappedTasks = tasks.map(task => {
+      const obj = task.toObject();
+      if (!obj.status) {
+        obj.status = obj.completed ? "completed" : "pending";
+      }
+      return obj;
+    });
 
-    res.json(tasks)
+    res.json(mappedTasks);
 
   } catch (error) {
     res.status(500).json({ message: "Server error" })
@@ -100,7 +107,7 @@ exports.getTaskStats = async (req, res) => {
 
     const completed = await Task.countDocuments({
       user: userId,
-      completed: true
+      $or: [{ status: "completed" }, { completed: true }]
     })
 
     const pending = total - completed
@@ -113,7 +120,10 @@ exports.getTaskStats = async (req, res) => {
     const overdue = await Task.countDocuments({
       user: userId,
       endTime: { $lt: new Date() },
-      completed: false
+      $and: [
+        { status: { $ne: "completed" } },
+        { completed: { $ne: true } }
+      ]
     })
 
     res.json({

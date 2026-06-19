@@ -12,11 +12,9 @@ function useTaskFilters(
         return tasks.filter(task => {
 
             const matchesFilter =
-                filter === "completed"
-                    ? task.completed
-                    : filter === "pending"
-                        ? !task.completed
-                        : true
+                filter === "all"
+                    ? true
+                    : task.status === filter;
 
             const matchesSearch =
                 task.title

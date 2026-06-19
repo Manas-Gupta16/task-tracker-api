@@ -42,7 +42,7 @@ function TaskView({
 
                 <input
                     type="checkbox"
-                    checked={task.completed}
+                    checked={task.status === "completed"}
                     onChange={handleToggle}
                 />
 
@@ -51,7 +51,7 @@ function TaskView({
                     <div className="flex items-center gap-2">
 
                         <span
-                            className={`font-medium ${task.completed
+                            className={`font-medium ${task.status === "completed"
                                     ? "line-through text-gray-400"
                                     : "dark:text-white"
                                 }`}

@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { useOutletContext } from "react-router-dom";
 import Confetti from "react-confetti";
 import TaskList from "../components/TaskList";
+import KanbanBoard from "../components/KanbanBoard";
 import { useGlobalTasks } from "../context/TaskContext";
 
 // hooks
@@ -21,6 +22,7 @@ import {
 
 function TasksPage() {
   const [filter, setFilter] = useState("all");
+  const [view, setView] = useState("board");
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
   const [confetti, setConfetti] = useState(false);
@@ -44,7 +46,7 @@ function TasksPage() {
   } = useTaskEditing(saveEdit);
 
   const now = useTaskNotifications(tasks);
-  const allCompleted = tasks.length > 0 && tasks.every(t => t.completed);
+  const allCompleted = tasks.length > 0 && tasks.every(t => t.status === "completed");
 
   const filteredTasks = useTaskFilters(
     tasks,
@@ -124,6 +126,22 @@ function TasksPage() {
               className="pl-10 border border-gray-300 p-2.5 rounded-lg w-full dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition shadow-sm"
             />
           </div>
+
+          <div className="flex bg-white dark:bg-gray-800 rounded-lg p-1 shadow-sm border border-gray-200 dark:border-gray-700 w-full md:w-auto">
+            {['list', 'board'].map(v => (
+              <button
+                key={v}
+                onClick={() => setView(v)}
+                className={`px-4 py-1.5 rounded-md text-sm font-medium capitalize transition
+                  ${view === v 
+                    ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300" 
+                    : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"}
+                `}
+              >
+                {v}
+              </button>
+            ))}
+          </div>
         </div>
       </header>
 
@@ -142,8 +160,29 @@ function TasksPage() {
         </div>
       )}
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-1">
-        <TaskList
+      {view === 'list' ? (
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-1">
+          <TaskList
+            filteredTasks={filteredTasks}
+            getTaskStatus={getTaskStatus}
+            now={now}
+            editingTask={editingTask}
+            setEditingTask={setEditingTask}
+            saveEdit={handleSaveEdit}
+            startEdit={startEdit}
+            deleteTask={deleteTask}
+            toggleComplete={handleToggleComplete}
+            activeTag={activeTag}
+            setActiveTag={setActiveTag}
+            getTagColor={getTagColor}
+            getPriorityStyle={getPriorityStyle}
+            formatPriority={formatPriority}
+            formatTime={formatTime}
+            getTimeRemaining={getTimeRemaining}
+          />
+        </div>
+      ) : (
+        <KanbanBoard
           filteredTasks={filteredTasks}
           getTaskStatus={getTaskStatus}
           now={now}
@@ -161,7 +200,7 @@ function TasksPage() {
           formatTime={formatTime}
           getTimeRemaining={getTimeRemaining}
         />
-      </div>
+      )}
     </div>
   );
 }

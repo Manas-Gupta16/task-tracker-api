@@ -124,7 +124,7 @@ function useTasks() {
 
             const updatedTask = await updateTaskService(
                 task._id,
-                { completed: !task.completed }
+                { status: task.status === "completed" ? "pending" : "completed" }
             )
 
             setTasks(prev =>
@@ -137,7 +137,7 @@ function useTasks() {
 
             fetchStats()
 
-            if (!task.completed) {
+            if (task.status !== "completed") {
 
                 setConfetti(true)
 
@@ -155,6 +155,22 @@ function useTasks() {
 
         }
 
+    }
+
+    const updateTaskStatus = async (task, newStatus) => {
+        try {
+            const updatedTask = await updateTaskService(
+                task._id,
+                { status: newStatus }
+            )
+            setTasks(prev =>
+                prev.map(t => t._id === task._id ? updatedTask : t)
+            )
+            fetchStats()
+        } catch (err) {
+            console.error(err)
+            toast.error("Error updating task status")
+        }
     }
 
     const saveEdit = async (
@@ -222,6 +238,7 @@ function useTasks() {
         addTask,
         deleteTask,
         toggleComplete,
+        updateTaskStatus,
         saveEdit
     }
 

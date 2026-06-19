@@ -9,7 +9,7 @@ function useUpcomingTasks(tasks) {
         return tasks
             .filter(task =>
                 task.endTime &&
-                !task.completed &&
+                task.status !== "completed" &&
                 new Date(task.endTime) > now
             )
             .sort(

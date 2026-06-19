@@ -25,7 +25,7 @@ function useBulkComplete(
 
                 const incompleteTasks =
                     tasks.filter(
-                        task => !task.completed
+                        task => task.status !== "completed"
                     )
 
                 if (incompleteTasks.length === 0) {
@@ -43,7 +43,7 @@ function useBulkComplete(
                         incompleteTasks.map(task =>
                             API.put(
                                 `/tasks/${task._id}`,
-                                { completed: true },
+                                { status: "completed" },
                                 {
                                     headers: {
                                         Authorization:

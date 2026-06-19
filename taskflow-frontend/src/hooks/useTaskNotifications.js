@@ -23,7 +23,7 @@ function useTaskNotifications(tasks) {
 
         tasks.forEach(task => {
 
-            if (!task.endTime || task.completed)
+            if (!task.endTime || task.status === "completed")
                 return
 
             const end =
