@@ -3,7 +3,7 @@ const Task = require("../models/Task")
 // ✅ CREATE TASK
 exports.createTask = async (req, res) => {
   try {
-    const { title, description, tags, priority, startTime, endTime, category } = req.body
+    const { title, description, tags, priority, startTime, endTime, category, timeSpent, isRecurring, recurrencePattern } = req.body
 
     const task = await Task.create({
       user: req.user._id,
@@ -13,7 +13,10 @@ exports.createTask = async (req, res) => {
       priority,
       startTime,
       endTime,
-      category
+      category,
+      timeSpent,
+      isRecurring,
+      recurrencePattern
     })
 
     res.status(201).json(task)
@@ -58,6 +61,8 @@ exports.updateTask = async (req, res) => {
       return res.status(401).json({ message: "Not authorized" })
     }
 
+    const wasCompleted = task.status === "completed"
+
     const updatedTask = await Task.findByIdAndUpdate(
       req.params.id,
       {
@@ -66,6 +71,39 @@ exports.updateTask = async (req, res) => {
       },
       { new: true }
     )
+
+    const isNowCompleted = updatedTask.status === "completed"
+
+    if (!wasCompleted && isNowCompleted && updatedTask.isRecurring && updatedTask.recurrencePattern !== "none") {
+       let nextStartTime = updatedTask.startTime ? new Date(updatedTask.startTime) : new Date();
+       let nextEndTime = updatedTask.endTime ? new Date(updatedTask.endTime) : null;
+       
+       if (updatedTask.recurrencePattern === "daily") {
+          nextStartTime.setDate(nextStartTime.getDate() + 1);
+          if (nextEndTime) nextEndTime.setDate(nextEndTime.getDate() + 1);
+       } else if (updatedTask.recurrencePattern === "weekly") {
+          nextStartTime.setDate(nextStartTime.getDate() + 7);
+          if (nextEndTime) nextEndTime.setDate(nextEndTime.getDate() + 7);
+       } else if (updatedTask.recurrencePattern === "monthly") {
+          nextStartTime.setMonth(nextStartTime.getMonth() + 1);
+          if (nextEndTime) nextEndTime.setMonth(nextEndTime.getMonth() + 1);
+       }
+       
+       await Task.create({
+          user: updatedTask.user,
+          title: updatedTask.title,
+          description: updatedTask.description,
+          tags: updatedTask.tags,
+          priority: updatedTask.priority,
+          category: updatedTask.category,
+          startTime: nextStartTime,
+          endTime: nextEndTime,
+          isRecurring: true,
+          recurrencePattern: updatedTask.recurrencePattern,
+          status: "pending",
+          timeSpent: 0
+       });
+    }
 
     res.json(updatedTask)
 

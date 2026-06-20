@@ -49,6 +49,22 @@ const taskSchema = new mongoose.Schema(
   endTime: {
     type: Date,
     default: null
+  },
+
+  timeSpent: {
+    type: Number,
+    default: 0
+  },
+
+  isRecurring: {
+    type: Boolean,
+    default: false
+  },
+
+  recurrencePattern: {
+    type: String,
+    enum: ["none", "daily", "weekly", "monthly"],
+    default: "none"
   }
 
 },

@@ -3,6 +3,7 @@ import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import DarkModeToggle from "./DarkModeToggle";
 import AddTaskModal from "./AddTaskModal";
+import PomodoroTimer from "./PomodoroTimer";
 import { useGlobalTasks } from "../context/TaskContext";
 
 function Layout() {
@@ -60,6 +61,8 @@ function Layout() {
           </div>
         </div>
       )}
+
+      <PomodoroTimer />
     </div>
   );
 }

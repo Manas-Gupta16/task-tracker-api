@@ -223,6 +223,20 @@ function useTasks() {
 
     }
 
+    const updateTaskTime = async (taskId, newTimeSpent) => {
+        try {
+            const updatedTask = await updateTaskService(taskId, { timeSpent: newTimeSpent })
+            setTasks(prev =>
+                prev.map(t =>
+                    t._id === taskId ? updatedTask : t
+                )
+            )
+        } catch (err) {
+            console.error(err)
+            toast.error("Failed to save tracked time")
+        }
+    }
+
     return {
         tasks,
         stats,
@@ -234,6 +248,7 @@ function useTasks() {
         deleteTask,
         toggleComplete,
         updateTaskStatus,
+        updateTaskTime,
         saveEdit
     }
 

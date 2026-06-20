@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, useState } from "react";
 import useTasks from "../hooks/useTasks";
 import useTaskTags from "../hooks/useTaskTags";
 import useBulkComplete from "../hooks/useBulkComplete";
@@ -22,11 +22,16 @@ export function TaskProvider({ children }) {
     () => {} // dummy setConfetti for bulk action
   );
 
+  // Timer state
+  const [activeTimerTask, setActiveTimerTask] = useState(null);
+
   const value = {
     ...taskData,
     allTags,
     bulkLoading,
-    markAllCompleted
+    markAllCompleted,
+    activeTimerTask,
+    setActiveTimerTask
   };
 
   return (

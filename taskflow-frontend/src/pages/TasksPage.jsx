@@ -3,6 +3,7 @@ import { useOutletContext } from "react-router-dom";
 import Confetti from "react-confetti";
 import TaskList from "../components/TaskList";
 import KanbanBoard from "../components/KanbanBoard";
+import CalendarBoard from "../components/CalendarBoard";
 import { useGlobalTasks } from "../context/TaskContext";
 
 // hooks
@@ -129,7 +130,7 @@ function TasksPage() {
           </div>
 
           <div className="flex bg-white dark:bg-gray-800 rounded-lg p-1 shadow-sm border border-gray-200 dark:border-gray-700 w-full md:w-auto">
-            {['list', 'board'].map(v => (
+            {['list', 'board', 'calendar'].map(v => (
               <button
                 key={v}
                 onClick={() => setView(v)}
@@ -183,7 +184,7 @@ function TasksPage() {
             getTimeRemaining={getTimeRemaining}
           />
         </div>
-      ) : (
+      ) : view === 'board' ? (
         <KanbanBoard
           filteredTasks={filteredTasks}
           isLoading={isLoading}
@@ -203,6 +204,8 @@ function TasksPage() {
           formatTime={formatTime}
           getTimeRemaining={getTimeRemaining}
         />
+      ) : (
+        <CalendarBoard tasks={filteredTasks} startEdit={startEdit} />
       )}
     </div>
   );
