@@ -1,4 +1,6 @@
-function UpcomingTasks({ tasks }) {
+import { TaskItemSkeleton } from "./LoadingSkeletons"
+
+function UpcomingTasks({ tasks, isLoading }) {
 
     const getDueText = (endTime) => {
 
@@ -33,12 +35,18 @@ function UpcomingTasks({ tasks }) {
                 </h2>
 
                 <span className="text-sm text-gray-500">
-                    {tasks.length}
+                    {!isLoading && tasks.length}
                 </span>
 
             </div>
 
-            {tasks.length === 0 ? (
+            {isLoading ? (
+                <div className="space-y-3">
+                    <TaskItemSkeleton />
+                    <TaskItemSkeleton />
+                    <TaskItemSkeleton />
+                </div>
+            ) : tasks.length === 0 ? (
 
                 <p className="text-gray-500">
                     No upcoming deadlines

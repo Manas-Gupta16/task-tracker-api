@@ -1,4 +1,6 @@
-function CategoryStats({ stats }) {
+import { CategoryStatSkeleton } from "./LoadingSkeletons"
+
+function CategoryStats({ stats, isLoading }) {
 
     return (
 
@@ -8,9 +10,12 @@ function CategoryStats({ stats }) {
                 Category Statistics
             </h2>
 
-            <div className="space-y-3">
+            {isLoading ? (
+                <CategoryStatSkeleton />
+            ) : (
+                <div className="space-y-3">
 
-                <div className="flex justify-between dark:text-white">
+                    <div className="flex justify-between dark:text-white">
                     <span>Study</span>
                     <span>{stats.study}</span>
                 </div>
@@ -25,8 +30,8 @@ function CategoryStats({ stats }) {
                     <span>{stats.work}</span>
                 </div>
 
-            </div>
-
+                </div>
+            )}
         </div>
 
     )

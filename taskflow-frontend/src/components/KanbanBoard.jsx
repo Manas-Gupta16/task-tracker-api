@@ -11,8 +11,11 @@ import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import KanbanColumn from "./KanbanColumn";
 import { useGlobalTasks } from "../context/TaskContext";
 
+import { KanbanColumnSkeleton } from "./LoadingSkeletons";
+
 export default function KanbanBoard({
   filteredTasks,
+  isLoading,
   getTaskStatus,
   now,
   editingTask,
@@ -30,6 +33,16 @@ export default function KanbanBoard({
   getTimeRemaining,
 }) {
   const { updateTaskStatus } = useGlobalTasks();
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+        <KanbanColumnSkeleton />
+        <KanbanColumnSkeleton />
+        <KanbanColumnSkeleton />
+      </div>
+    );
+  }
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

@@ -12,6 +12,8 @@ import {
 function useTasks() {
 
     const [tasks, setTasks] = useState([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [isStatsLoading, setIsStatsLoading] = useState(true)
 
     const [stats, setStats] = useState({
         total: 0,
@@ -27,37 +29,28 @@ function useTasks() {
     }, [])
 
     const fetchTasks = async () => {
-
         try {
-
+            setIsLoading(true)
             const data = await fetchTasksService()
-
             setTasks(data)
-
         } catch {
-
             toast.error("Failed to fetch tasks")
-
+        } finally {
+            setIsLoading(false)
         }
-
     }
 
     const fetchStats = async () => {
-
         try {
-
+            setIsStatsLoading(true)
             const data = await fetchStatsService()
-
             setStats(data)
-
         } catch (err) {
-
             console.error(err)
-
             toast.error("Failed to fetch stats")
-
+        } finally {
+            setIsStatsLoading(false)
         }
-
     }
 
     const addTask = async (taskData, resetForm, setActiveTag) => {
@@ -233,6 +226,8 @@ function useTasks() {
     return {
         tasks,
         stats,
+        isLoading,
+        isStatsLoading,
         setTasks,
         fetchStats,
         addTask,

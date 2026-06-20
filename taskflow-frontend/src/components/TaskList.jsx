@@ -2,9 +2,11 @@ import { memo } from "react"
 import { AnimatePresence } from "framer-motion"
 
 import TaskCard from "./TaskCard"
+import { TaskCardSkeleton } from "./LoadingSkeletons"
 
 const TaskList = memo(function TaskList({
     filteredTasks,
+    isLoading,
     getTaskStatus,
     now,
     editingTask,
@@ -23,6 +25,16 @@ const TaskList = memo(function TaskList({
 }) {
 
     console.log("TaskList render")
+
+    if (isLoading) {
+        return (
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
+                <TaskCardSkeleton />
+                <TaskCardSkeleton />
+                <TaskCardSkeleton />
+            </div>
+        )
+    }
 
     return (
 

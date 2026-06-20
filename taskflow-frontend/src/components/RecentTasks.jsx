@@ -1,6 +1,7 @@
 import timeAgo from "../utils/timeAgo"
+import { TaskItemSkeleton } from "./LoadingSkeletons"
 
-function RecentTasks({ tasks }) {
+function RecentTasks({ tasks, isLoading }) {
 
     return (
 
@@ -13,12 +14,18 @@ function RecentTasks({ tasks }) {
                 </h2>
 
                 <span className="text-sm text-gray-500">
-                    {tasks.length}
+                    {!isLoading && tasks.length}
                 </span>
 
             </div>
 
-            {tasks.length === 0 ? (
+            {isLoading ? (
+                <div className="space-y-3">
+                    <TaskItemSkeleton />
+                    <TaskItemSkeleton />
+                    <TaskItemSkeleton />
+                </div>
+            ) : tasks.length === 0 ? (
 
                 <p className="text-gray-500">
                     No tasks yet
