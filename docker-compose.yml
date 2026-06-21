@@ -1,0 +1,22 @@
+
+
+services:
+  backend:
+    build: .
+    container_name: taskflow_backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    restart: unless-stopped
+
+  frontend:
+    build: ./taskflow-frontend
+    container_name: taskflow_frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:5000/api
+    depends_on:
+      - backend
+    restart: unless-stopped
