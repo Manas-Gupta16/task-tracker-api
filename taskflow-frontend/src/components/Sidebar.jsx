@@ -1,4 +1,4 @@
-import { LayoutDashboard, CheckCircle, Clock, ListTodo, LogOut, Plus } from "lucide-react";
+import { LayoutDashboard, CheckCircle, Clock, ListTodo, LogOut, Plus, X } from "lucide-react";
 import { Link } from "react-router-dom";
 
 function Sidebar({
@@ -8,7 +8,9 @@ function Sidebar({
   setActiveTag,
   tasks = [],
   currentPath,
-  openNewTaskModal
+  openNewTaskModal,
+  isMobileMenuOpen,
+  setIsMobileMenuOpen
 }) {
 
   // Safe tag count
@@ -16,15 +18,35 @@ function Sidebar({
     tasks?.filter(t => (t.tags || []).includes(tag)).length || 0;
 
   return (
-    <div className="w-64 bg-gradient-to-b from-indigo-600 to-blue-600 dark:from-gray-800 dark:to-gray-900 text-white min-h-screen p-6 flex flex-col z-10 sticky top-0">
+    <>
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="md:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
 
-      {/* Logo */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold flex items-center gap-2">
-          <CheckCircle className="text-blue-300" />
-          TaskFlow
-        </h2>
-      </div>
+      <div className={`
+        fixed md:sticky top-0 left-0 z-50 h-screen w-64 shrink-0
+        bg-gradient-to-b from-indigo-600 to-blue-600 dark:from-gray-800 dark:to-gray-900 
+        text-white p-6 flex flex-col transition-transform duration-300 ease-in-out
+        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+      `}>
+
+        {/* Logo and Mobile Close */}
+        <div className="mb-8 flex items-center justify-between">
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <CheckCircle className="text-blue-300" />
+            TaskFlow
+          </h2>
+          <button 
+            className="md:hidden text-indigo-200 hover:text-white p-1"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            <X size={24} />
+          </button>
+        </div>
 
       <button
         onClick={openNewTaskModal}
@@ -105,7 +127,8 @@ function Sidebar({
         </button>
       </div>
 
-    </div>
+      </div>
+    </>
   );
 }
 
