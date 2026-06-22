@@ -1,174 +1,125 @@
-# 🚀 TaskFlow – Cloud-Native Task Management Platform
+# TaskFlow - Cloud-Native Task Management Platform
 
-TaskFlow is a full-stack task management application that enables users to securely manage their daily tasks through a clean and responsive dashboard. It demonstrates core full-stack development concepts including authentication, RESTful APIs, and frontend-backend integration.
+TaskFlow is a robust full-stack task management application designed for scalability, security, and performance. It enables users to securely manage their daily tasks through a modern and responsive dashboard.
 
----
+## Overview
 
-## ✨ Features
+This project demonstrates core full-stack development concepts, emphasizing secure authentication, RESTful API design, frontend-backend integration, and modern cloud-native deployment practices using Docker.
 
-- 🔐 Secure User Authentication (JWT-based Login & Registration)
-- 📋 Task Management (Create, Read, Update, Delete)
-- ✅ Mark tasks as completed
-- ❌ Delete tasks
-- 🔒 Protected Routes (Dashboard accessible only after login)
-- ⚡ Responsive and modern UI using Tailwind CSS
+## Features
 
----
+- Secure User Authentication (JWT-based Login & Registration)
+- Comprehensive Task Management (Create, Read, Update, Delete)
+- Protected Routes (Dashboard accessible only after authentication)
+- Responsive and modern user interface utilizing Tailwind CSS
+- Containerized environment for consistent deployment (Docker & Docker Compose)
+- Multi-stage Nginx builds for optimized frontend delivery
+- Production-ready security headers and rate limiting
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
-
 - React.js
 - React Router
+- Vite
 - Axios
 - Tailwind CSS
 
 ### Backend
-
 - Node.js
 - Express.js
+- Helmet (Security Middleware)
+- Express Rate Limit
 
 ### Database
+- MongoDB (via Mongoose)
 
-- MongoDB
+### Infrastructure & Deployment
+- Docker & Docker Compose
+- Nginx (Reverse Proxy & Static File Serving)
 
-### Tools & Technologies
-
-- JSON Web Tokens (JWT)
-- Git & GitHub
-
----
-
-## 📁 Project Structure
+## Project Structure
 
 ```
-TaskFlow/
+task-tracker-api/
 │
-├── client/                 # Frontend (React)
-│   ├── src/
-│   │   ├── pages/          # Login, Register, Dashboard
-│   │   ├── services/       # API configuration
-│   │   ├── App.jsx
-│   │   └── main.jsx
+├── taskflow-frontend/      # Frontend application (React/Vite)
+│   ├── src/                # Source code (Components, Pages, Services)
+│   ├── public/             # Static assets
+│   ├── Dockerfile          # Multi-stage Nginx build configuration
+│   └── nginx.conf          # Nginx routing configuration
 │
-├── server/                 # Backend (Node.js + Express)
-│   ├── routes/
-│   ├── controllers/
-│   ├── models/
-│   └── server.js
+├── controllers/            # Backend business logic
+├── models/                 # MongoDB schemas
+├── routes/                 # API route definitions
+├── middleware/             # Authentication & custom middleware
+├── config/                 # Database configuration
+├── Dockerfile              # Backend Node.js image configuration
+├── docker-compose.yml      # Multi-container orchestration
+└── server.js               # Entry point for the Express API
 ```
 
----
+## Installation & Local Development
 
-## ⚙️ Installation & Setup
+### Prerequisites
+- Git
+- Docker Desktop (or Docker Engine)
 
-### 1. Clone the Repository
+### Quick Start (Docker)
 
-```
-git clone https://github.com/your-username/taskflow.git
-cd taskflow
-```
+The easiest way to run the application locally is using Docker Compose.
 
----
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Manas-Gupta16/task-tracker-api.git
+   cd task-tracker-api
+   ```
 
-### 2. Setup Backend
+2. Configure environment variables. Create a `.env` file in the root directory:
+   ```env
+   PORT=5000
+   MONGO_URI=your_mongodb_connection_string
+   JWT_SECRET=your_secure_random_string
+   ```
 
-```
-cd server
-npm install
-```
+3. Build and run the containers:
+   ```bash
+   docker-compose up --build
+   ```
 
-Create a `.env` file in the server directory:
+4. Access the application:
+   - Frontend: `http://localhost:80` (or `http://localhost:5173` depending on configuration)
+   - Backend API: `http://localhost:5000/api`
 
-```
-PORT=5000
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_secret_key
-```
+## API Endpoints
 
-Run backend server:
+### Authentication
+- `POST /api/auth/register` - Register a new user account
+- `POST /api/auth/login` - Authenticate user and receive JWT
 
-```
-npm run dev
-```
+### Tasks
+- `GET /api/tasks` - Retrieve all tasks for the authenticated user
+- `POST /api/tasks` - Create a new task
+- `PUT /api/tasks/:id` - Update an existing task
+- `DELETE /api/tasks/:id` - Delete a task
 
----
+### System
+- `GET /` - Root endpoint
+- `GET /api/health` - System health check and uptime
 
-### 3. Setup Frontend - UI Upgrade
+## Security Implementations
 
-```
-cd client
-npm install
-npm run dev
-```
+- Passwords are securely hashed using bcryptjs.
+- API endpoints are protected using JSON Web Tokens (JWT).
+- HTTP headers are secured against common vulnerabilities using Helmet.
+- Brute-force protection is enforced via Express Rate Limiting.
+- Cross-Origin Resource Sharing (CORS) is strictly configured to allow only authorized frontend domains.
 
----
-
-## 🌐 API Endpoints
-
-### Authentication Routes
-
-```
-POST /api/auth/register
-POST /api/auth/login
-```
-
-### Task Routes
-
-```
-GET    /api/tasks
-POST   /api/tasks
-PUT    /api/tasks/:id
-DELETE /api/tasks/:id
-```
-
----
-
-## 🔐 Authentication Flow
-
-1. User registers or logs in
-2. Server generates a JWT token
-3. Token is stored in localStorage
-4. Token is sent in Authorization headers for protected API requests
-
----
-
-## 🚧 Future Improvements
-
-- ✏️ Edit Task functionality
-- 🔍 Search and filter tasks
-- 📊 Dashboard analytics (task stats)
-- 🌙 Dark mode support
-- ☁️ Cloud deployment (Frontend + Backend)
-- 🐳 Docker containerization
-
----
-
-## 📌 Learning Outcomes
-
-- Implemented secure authentication using JWT
-- Built RESTful APIs using Node.js and Express.js
-- Integrated frontend with backend services using Axios
-- Managed application state in React
-- Structured a scalable full-stack application
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome. Feel free to fork the repository and submit pull requests.
-
----
-
-## 📄 License
+## License
 
 This project is licensed under the MIT License.
 
----
+## Author
 
-## 👨‍💻 Author
-
-**Manas Gupta**
-Aspiring Software Engineer
-Passionate about building scalable and cloud-native applications
+Manas Gupta
+Software Engineer
