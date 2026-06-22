@@ -1,5 +1,7 @@
 # TaskFlow - Cloud-Native Task Management Platform
 
+**[View Live Application on Render](https://task-tracker-api-oys6.onrender.com)**
+
 TaskFlow is a robust full-stack task management application designed for scalability, security, and performance. It enables users to securely manage their daily tasks through a modern and responsive dashboard.
 
 ## Overview
@@ -122,4 +124,3 @@ This project is licensed under the MIT License.
 ## Author
 
 Manas Gupta
-Software Engineer
