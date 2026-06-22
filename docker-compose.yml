@@ -14,7 +14,7 @@ services:
     build: ./taskflow-frontend
     container_name: taskflow_frontend
     ports:
-      - "5173:5173"
+      - "5173:80"
     environment:
       - VITE_API_URL=http://localhost:5000/api
     depends_on:
